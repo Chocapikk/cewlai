@@ -61,6 +61,8 @@ type CLI struct {
 	WithNumbers   bool `default:"true" help:"Include words with numbers" name:"with-numbers"`
 	Count         bool `short:"c" help:"Show word frequency count"`
 	Groups        int  `short:"g" default:"0" help:"Generate word groups of N"`
+	Mutate        bool   `help:"Generate word mutations (leet, reverse, suffixes like CUPP)"`
+	MutateConfig  string `help:"Custom mutation config file (JSON)" name:"mutate-config"`
 
 	// Crawling
 	Offsite           bool     `help:"Follow offsite links"`
@@ -149,7 +151,23 @@ func main() {
 		aiWords = enrichWithAI(cli, result)
 	}
 
-	final := words.DeduplicateWords(crawlWords, aiWords)
+	merged := words.DeduplicateWords(crawlWords, aiWords)
+
+	if cli.Mutate {
+		cfg := words.DefaultMutateConfig()
+		if cli.MutateConfig != "" {
+			var err error
+			cfg, err = words.LoadMutateConfig(cli.MutateConfig)
+			if err != nil {
+				logFatal("Failed to load mutate config: %v", err)
+			}
+		}
+		logInfo("Generating mutations...")
+		merged = words.MutateWords(merged, cfg)
+		logSuccess("Mutated to %d words", len(merged))
+	}
+
+	final := words.DeduplicateWords(merged)
 	logSuccess("Final wordlist: %d unique words", len(final))
 
 	writeWordlist(final, cli.Output, cli.Count, cli.Groups)

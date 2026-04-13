@@ -1,0 +1,26 @@
+{
+  "leet": {
+    "a": "4",
+    "e": "3",
+    "i": "1",
+    "o": "0",
+    "s": "5",
+    "t": "7",
+    "g": "9",
+    "z": "2"
+  },
+  "suffixes": [
+    "1", "12", "123", "1234",
+    "!", "!!", "@", "#", "$",
+    "01", "69", "99",
+    "2024", "2025", "2026"
+  ],
+  "prefixes": [],
+  "capitalize": true,
+  "uppercase": true,
+  "lowercase": true,
+  "reverse": true,
+  "leet_enabled": true,
+  "min_length": 0,
+  "max_length": 0
+}
