@@ -261,7 +261,7 @@ func readLines(path string) []string {
 	if err != nil {
 		logFatal("Failed to open %s: %v", path, err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	var lines []string
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
