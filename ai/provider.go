@@ -13,7 +13,7 @@ const outputRule = `
 
 IMPORTANT: Every word you generate MUST be directly derived from the context provided. Do not generate random or generic words. Base everything on what the site actually contains.
 
-Output ONLY words, one per line. No explanations, no numbering, no markdown, no sentences.`
+Output ONLY words separated by commas on a single line. No explanations, no numbering, no markdown, no sentences. Example: word1,word2,word3`
 
 var PromptModes = map[string]string{
 	"default": `You are a security-focused wordlist generator for penetration testing.
@@ -159,14 +159,16 @@ func BuildUserMessage(result *crawler.CrawlResult) string {
 }
 
 func ParseAIResponse(text string) []string {
-	var words []string
+	var out []string
 	for _, line := range strings.Split(text, "\n") {
-		w := strings.TrimSpace(line)
-		w = strings.TrimLeft(w, "-*# ")
-		if w == "" || strings.Contains(w, " ") {
-			continue
+		for _, w := range strings.Split(line, ",") {
+			w = strings.TrimSpace(w)
+			w = strings.TrimLeft(w, "-*# ")
+			if w == "" || strings.Contains(w, " ") {
+				continue
+			}
+			out = append(out, w)
 		}
-		words = append(words, w)
 	}
-	return words
+	return out
 }

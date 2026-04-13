@@ -210,7 +210,8 @@ func enrichWithAI(cli CLI, result *crawler.CrawlResult) []string {
 		prompt := ai.ResolvePrompt(cli.Mode, cli.Prompt, remaining)
 		batch, err := p.GenerateWords(context.Background(), result, prompt, maxTokens)
 		if err != nil {
-			logFatal("AI enrichment failed: %v", err)
+			logError("AI request failed: %v", err)
+			break
 		}
 
 		batch = words.FilterWords(batch, cli.MinWordLength, cli.MaxWordLength, cli.WithNumbers)
