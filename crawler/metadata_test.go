@@ -32,13 +32,13 @@ func TestExtractOfficeMetadata(t *testing.T) {
 	w := zip.NewWriter(&buf)
 
 	f, _ := w.Create("docProps/core.xml")
-	f.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+	_, _ = f.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <cp:coreProperties>
   <dc:creator>Alice Author</dc:creator>
   <cp:lastModifiedBy>Bob Editor</cp:lastModifiedBy>
 </cp:coreProperties>`))
 
-	w.Close()
+	_ = w.Close()
 
 	var mu sync.Mutex
 	metaSet := make(map[string]struct{})

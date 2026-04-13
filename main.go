@@ -71,6 +71,7 @@ type CLI struct {
 	Header            []string `help:"Custom header (repeatable, Key: Value)"`
 	Exclude           string   `help:"File with paths to exclude"`
 	MaxPages          int      `default:"0" help:"Maximum pages to crawl (0 = no limit)" name:"max-pages"`
+	Threads           int      `short:"t" default:"2" help:"Number of concurrent crawl threads"`
 	CapturePaths      bool     `help:"Add URL path components to wordlist" name:"capture-paths"`
 	CaptureSubdomains bool     `help:"Add subdomains to wordlist" name:"capture-subdomains"`
 	CaptureDomain     bool     `help:"Add domain to wordlist" name:"capture-domain"`
@@ -120,6 +121,7 @@ func main() {
 		CaptureSubdomains: cli.CaptureSubdomains,
 		CaptureDomain:     cli.CaptureDomain,
 		MaxPages:          cli.MaxPages,
+		Threads:           cli.Threads,
 		ProxyURL:          cli.Proxy,
 		AuthType:          cli.AuthType,
 		AuthUser:          cli.AuthUser,
@@ -194,11 +196,11 @@ func enrichWithAI(cli CLI, result *crawler.CrawlResult) []string {
 func writeWordlist(wordList []string, output string, showCount bool, groupSize int) {
 	w := openOutput(output)
 	if w != os.Stdout {
-		defer w.Close()
+		defer func() { _ = w.Close() }()
 	}
 
 	for _, line := range formatWordlist(wordList, showCount, groupSize) {
-		fmt.Fprintln(w, line)
+		_, _ = fmt.Fprintln(w, line)
 	}
 }
 
@@ -229,7 +231,7 @@ func writeExtras(result *crawler.CrawlResult, cli CLI) {
 func writeLines(lines []string, path string) {
 	if path == "" {
 		for _, l := range lines {
-			fmt.Fprintln(os.Stderr, l)
+			_, _ = fmt.Fprintln(os.Stderr, l)
 		}
 		return
 	}
@@ -237,9 +239,9 @@ func writeLines(lines []string, path string) {
 	if err != nil {
 		logFatal("Failed to create file %s: %v", path, err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	for _, l := range lines {
-		fmt.Fprintln(f, l)
+		_, _ = fmt.Fprintln(f, l)
 	}
 }
 

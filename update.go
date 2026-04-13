@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -28,31 +27,32 @@ func downloadURL(tag, osName, arch string) string {
 }
 
 func selfUpdate() {
-	log.Println("Checking for updates...")
+	verboseMode = true
+	logInfo("Checking for updates...")
 
 	latest, err := fetchLatestTag()
 	if err != nil {
-		log.Fatalf("Failed to check for updates: %v", err)
+		logFatal("Failed to check for updates: %v", err)
 	}
 
 	current := "v" + version
 	if current == latest {
-		log.Printf("Already up-to-date (%s)", current)
+		logInfo("Already up-to-date (%s)", current)
 		return
 	}
 
-	log.Printf("New version available: %s (current: %s)", latest, current)
+	logInfo("New version available: %s (current: %s)", latest, current)
 
 	body, err := downloadRelease(latest)
 	if err != nil {
-		log.Fatalf("Failed to download update: %v", err)
+		logFatal("Failed to download update: %v", err)
 	}
 
 	if err := replaceBinary(body); err != nil {
-		log.Fatalf("Failed to install update: %v", err)
+		logFatal("Failed to install update: %v", err)
 	}
 
-	log.Printf("Updated to %s. Restart cewlai to use the new version.", latest)
+	logInfo("Updated to %s. Restart cewlai to use the new version.", latest)
 	os.Exit(0)
 }
 
@@ -61,7 +61,7 @@ func fetchLatestTag() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("GitHub API returned %d", resp.StatusCode)
@@ -81,13 +81,13 @@ func fetchLatestTag() (string, error) {
 
 func downloadRelease(tag string) ([]byte, error) {
 	url := downloadURL(tag, runtime.GOOS, runtime.GOARCH)
-	log.Printf("Downloading %s", url)
+	logInfo("Downloading %s", url)
 
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("download failed: %s returned %d", url, resp.StatusCode)
