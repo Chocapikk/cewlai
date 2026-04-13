@@ -97,7 +97,7 @@ func ResolvePrompt(mode, customPrompt string, maxWords int) string {
 }
 
 type AIProvider interface {
-	GenerateWords(ctx context.Context, result *crawler.CrawlResult, prompt string) ([]string, error)
+	GenerateWords(ctx context.Context, result *crawler.CrawlResult, prompt string, maxTokens int) ([]string, error)
 }
 
 var providerPresets = map[string]struct {
@@ -135,6 +135,17 @@ func NewAIProvider(provider, apiKey, model, baseURL string) (AIProvider, error) 
 	default:
 		return nil, fmt.Errorf("unknown provider: %s (supported: anthropic, openai, groq, openrouter, cerebras, huggingface)", provider)
 	}
+}
+
+func MaxTokensForWords(n int) int {
+	tokens := n * 3
+	if tokens < 4096 {
+		return 4096
+	}
+	if tokens > 16384 {
+		return 16384
+	}
+	return tokens
 }
 
 func BuildUserMessage(result *crawler.CrawlResult) string {

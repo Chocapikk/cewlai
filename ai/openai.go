@@ -41,10 +41,10 @@ func newOpenAIProvider(apiKey, model, baseURL string) *openaiProvider {
 	return &openaiProvider{client: openai.NewClient(opts...), model: model}
 }
 
-func (p *openaiProvider) GenerateWords(ctx context.Context, result *crawler.CrawlResult, prompt string) ([]string, error) {
+func (p *openaiProvider) GenerateWords(ctx context.Context, result *crawler.CrawlResult, prompt string, maxTokens int) ([]string, error) {
 	resp, err := p.client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Model:     openai.ChatModel(p.model),
-		MaxTokens: openai.Int(4096),
+		MaxTokens: openai.Int(int64(maxTokens)),
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.SystemMessage(prompt),
 			openai.UserMessage(BuildUserMessage(result)),

@@ -36,10 +36,10 @@ func newAnthropicProvider(apiKey, model, baseURL string) *anthropicProvider {
 	return &anthropicProvider{client: anthropic.NewClient(opts...), model: model}
 }
 
-func (p *anthropicProvider) GenerateWords(ctx context.Context, result *crawler.CrawlResult, prompt string) ([]string, error) {
+func (p *anthropicProvider) GenerateWords(ctx context.Context, result *crawler.CrawlResult, prompt string, maxTokens int) ([]string, error) {
 	resp, err := p.client.Messages.New(ctx, anthropic.MessageNewParams{
 		Model:     anthropic.Model(p.model),
-		MaxTokens: 4096,
+		MaxTokens: int64(maxTokens),
 		System:    []anthropic.TextBlockParam{{Text: prompt}},
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock(BuildUserMessage(result))),

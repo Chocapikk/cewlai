@@ -195,20 +195,52 @@ func enrichWithAI(cli CLI, result *crawler.CrawlResult) []string {
 		logFatal("AI provider error: %v", err)
 	}
 
-	prompt := ai.ResolvePrompt(cli.Mode, cli.Prompt, cli.AIWords)
-	logInfo("Sending context to %s for enrichment (mode: %s)...", cli.Provider, cli.Mode)
+	target := cli.AIWords
+	maxTokens := ai.MaxTokensForWords(target)
+	logInfo("Sending context to %s for enrichment (mode: %s, target: %d words)...", cli.Provider, cli.Mode, target)
 
-	aiWords, err := p.GenerateWords(context.Background(), result, prompt)
-	if err != nil {
-		logFatal("AI enrichment failed: %v", err)
+	seen := make(map[string]struct{})
+	var aiWords []string
+	attempt := 0
+
+	for len(aiWords) < target {
+		attempt++
+		remaining := target - len(aiWords)
+
+		prompt := ai.ResolvePrompt(cli.Mode, cli.Prompt, remaining)
+		batch, err := p.GenerateWords(context.Background(), result, prompt, maxTokens)
+		if err != nil {
+			logFatal("AI enrichment failed: %v", err)
+		}
+
+		batch = words.FilterWords(batch, cli.MinWordLength, cli.MaxWordLength, cli.WithNumbers)
+		if cli.Lowercase {
+			batch = words.LowercaseWords(batch)
+		}
+
+		added := 0
+		for _, w := range batch {
+			if _, exists := seen[w]; exists {
+				continue
+			}
+			seen[w] = struct{}{}
+			aiWords = append(aiWords, w)
+			added++
+		}
+
+		logInfo("Attempt %d: got %d/%d words (+%d new)", attempt, len(aiWords), target, added)
+
+		if added == 0 {
+			logInfo("AI exhausted context, stopping")
+			break
+		}
 	}
 
-	aiWords = words.FilterWords(aiWords, cli.MinWordLength, cli.MaxWordLength, cli.WithNumbers)
-	if cli.Lowercase {
-		aiWords = words.LowercaseWords(aiWords)
+	if len(aiWords) > target {
+		aiWords = aiWords[:target]
 	}
 
-	logSuccess("AI generated %d additional words", len(aiWords))
+	logSuccess("AI generated %d words", len(aiWords))
 	return aiWords
 }
 
