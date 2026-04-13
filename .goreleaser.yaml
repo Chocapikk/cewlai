@@ -7,7 +7,7 @@ before:
 
 builds:
   - id: cewlai
-    main: ./main.go
+    main: .
     binary: "cewlai"
     env:
       - CGO_ENABLED=1
