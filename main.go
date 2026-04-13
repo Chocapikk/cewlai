@@ -47,6 +47,7 @@ type CLI struct {
 	BaseURL  string `help:"Custom API base URL for OpenAI-compatible endpoints" name:"base-url"`
 	Mode     string `default:"default" help:"AI prompt mode: default, passwords, dirs, subdomains, geo"`
 	Prompt   string `help:"Custom AI system prompt (overrides --mode)"`
+	AIWords  int    `default:"200" help:"Number of AI-generated words" name:"ai-words"`
 
 	// Extraction
 	Email     bool   `short:"e" help:"Extract email addresses"`
@@ -194,7 +195,7 @@ func enrichWithAI(cli CLI, result *crawler.CrawlResult) []string {
 		logFatal("AI provider error: %v", err)
 	}
 
-	prompt := ai.ResolvePrompt(cli.Mode, cli.Prompt)
+	prompt := ai.ResolvePrompt(cli.Mode, cli.Prompt, cli.AIWords)
 	logInfo("Sending context to %s for enrichment (mode: %s)...", cli.Provider, cli.Mode)
 
 	aiWords, err := p.GenerateWords(context.Background(), result, prompt)

@@ -9,7 +9,11 @@ import (
 	"github.com/Chocapikk/cewlai/crawler"
 )
 
-const outputRule = "\n\nOutput ONLY words, one per line. No explanations, no numbering, no markdown, no sentences."
+const outputRule = `
+
+IMPORTANT: Every word you generate MUST be directly derived from the context provided. Do not generate random or generic words. Base everything on what the site actually contains.
+
+Output ONLY words, one per line. No explanations, no numbering, no markdown, no sentences.`
 
 var PromptModes = map[string]string{
 	"default": `You are a security-focused wordlist generator for penetration testing.
@@ -79,14 +83,17 @@ Think about:
 
 var SystemPrompt = PromptModes["default"]
 
-func ResolvePrompt(mode, customPrompt string) string {
+func ResolvePrompt(mode, customPrompt string, maxWords int) string {
+	base := PromptModes["default"]
 	if customPrompt != "" {
-		return customPrompt + outputRule
+		base = customPrompt + outputRule
+	} else if p, ok := PromptModes[mode]; ok {
+		base = p
 	}
-	if p, ok := PromptModes[mode]; ok {
-		return p
+	if maxWords > 0 {
+		base += fmt.Sprintf("\n\nGenerate exactly %d words, no more, no less.", maxWords)
 	}
-	return PromptModes["default"]
+	return base
 }
 
 type AIProvider interface {
