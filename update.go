@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 )
 
 const githubRepo = "Chocapikk/cewlai"
@@ -35,7 +36,10 @@ func selfUpdate() {
 		logFatal("Failed to check for updates: %v", err)
 	}
 
-	current := "v" + version
+	current := version
+	if !strings.HasPrefix(current, "v") {
+		current = "v" + current
+	}
 	if current == latest {
 		logInfo("Already up-to-date (%s)", current)
 		return
