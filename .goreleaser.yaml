@@ -1,0 +1,42 @@
+version: 2
+project_name: cewlai
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: cewlai
+    main: ./main.go
+    binary: "cewlai"
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+      - freebsd
+      - openbsd
+      - netbsd
+    goarch:
+      - amd64
+      - arm64
+      - 386
+    goarm:
+      - 6
+      - 7
+    flags:
+      - -trimpath
+    ldflags:
+      - "-s -w -X main.version=v{{ .Version }}"
+
+archives:
+  - id: custom
+    formats: binary
+    name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+release:
+  name_template: "CeWL AI v{{ .Version }}"
+  github:
+    owner: Chocapikk
+    name: cewlai
