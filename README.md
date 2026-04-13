@@ -92,6 +92,7 @@ Flags:
       --header=HEADER,...          Custom header (repeatable, Key: Value)
       --exclude=STRING             File with paths to exclude
       --max-pages=0                Maximum pages to crawl (0 = no limit)
+  -t, --threads=2                  Number of concurrent crawl threads
       --capture-paths              Add URL path components to wordlist
       --capture-subdomains         Add subdomains to wordlist
       --capture-domain             Add domain to wordlist
