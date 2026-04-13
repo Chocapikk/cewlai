@@ -84,6 +84,9 @@ Flags:
       --with-numbers               Include words with numbers
   -c, --count                      Show word frequency count
   -g, --groups=0                   Generate word groups of N
+      --mutate                     Generate word mutations (leet, reverse,
+                                   suffixes like CUPP)
+      --mutate-config=STRING       Custom mutation config file (JSON)
       --offsite                    Follow offsite links
       --proxy=STRING               HTTP proxy URL
       --auth-type=STRING           Auth type: basic
@@ -160,6 +163,7 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 | TLS skip                   | No               | Yes                                         |
 | Obfuscated email detection | No               | Yes                                         |
 | JavaScript parsing         | No               | Yes (jsluice, inline + external .js)        |
+| Word mutations (CUPP-like) | No               | Yes (leet, reverse, suffixes, custom JSON)  |
 
 ## Library Usage
 
