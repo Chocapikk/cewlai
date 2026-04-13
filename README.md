@@ -41,7 +41,7 @@ cewlai -u https://example.com --ai -p groq
 Full example:
 
 ```bash
-cewlai -u https://target.com -d 3 --ai -p anthropic -m haiku \
+cewlai -u https://example.com -d 3 --ai -p anthropic -m haiku \
   --lowercase --email --meta -o wordlist.txt --email-file emails.txt
 ```
 
@@ -124,7 +124,7 @@ Flags:
 ### Local (Ollama, LM Studio, vLLM)
 
 ```bash
-cewlai -u https://target.com --ai -p openai -m llama3 --base-url http://localhost:11434/v1 --api-key dummy
+cewlai -u https://example.com --ai -p openai -m llama3 --base-url http://localhost:11434/v1 --api-key dummy
 ```
 
 ## AI Modes

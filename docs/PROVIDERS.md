@@ -13,7 +13,7 @@ CeWL AI supports multiple LLM providers out of the box. This document lists all 
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
-cewlai -u https://target.com --ai -p anthropic -m sonnet
+cewlai -u https://example.com --ai -p anthropic -m sonnet
 ```
 
 ## OpenAI
@@ -25,7 +25,7 @@ cewlai -u https://target.com --ai -p anthropic -m sonnet
 
 ```bash
 export OPENAI_API_KEY=sk-...
-cewlai -u https://target.com --ai -p openai -m gpt-4.1-mini
+cewlai -u https://example.com --ai -p openai -m gpt-4.1-mini
 ```
 
 ## Groq (free)
@@ -38,7 +38,7 @@ cewlai -u https://target.com --ai -p openai -m gpt-4.1-mini
 
 ```bash
 export GROQ_API_KEY=gsk_...
-cewlai -u https://target.com --ai -p groq
+cewlai -u https://example.com --ai -p groq
 ```
 
 ## OpenRouter (free tier)
@@ -51,7 +51,7 @@ cewlai -u https://target.com --ai -p groq
 
 ```bash
 export OPENROUTER_API_KEY=sk-or-...
-cewlai -u https://target.com --ai -p openrouter
+cewlai -u https://example.com --ai -p openrouter
 ```
 
 ## Cerebras (free)
@@ -64,7 +64,7 @@ cewlai -u https://target.com --ai -p openrouter
 
 ```bash
 export CEREBRAS_API_KEY=csk-...
-cewlai -u https://target.com --ai -p cerebras
+cewlai -u https://example.com --ai -p cerebras
 ```
 
 ## HuggingFace (free)
@@ -76,7 +76,7 @@ cewlai -u https://target.com --ai -p cerebras
 
 ```bash
 export HF_TOKEN=hf_...
-cewlai -u https://target.com --ai -p huggingface
+cewlai -u https://example.com --ai -p huggingface
 ```
 
 ## Local models (Ollama, LM Studio, vLLM)
@@ -90,7 +90,7 @@ Any OpenAI-compatible endpoint works via `--base-url`. No API key needed for loc
 - **Pull a model**: `ollama pull llama3`
 
 ```bash
-cewlai -u https://target.com --ai -p openai -m llama3 --base-url http://localhost:11434/v1 --api-key dummy
+cewlai -u https://example.com --ai -p openai -m llama3 --base-url http://localhost:11434/v1 --api-key dummy
 ```
 
 ### LM Studio
@@ -99,7 +99,7 @@ cewlai -u https://target.com --ai -p openai -m llama3 --base-url http://localhos
 - Start the local server, then:
 
 ```bash
-cewlai -u https://target.com --ai -p openai -m your-model --base-url http://localhost:1234/v1 --api-key dummy
+cewlai -u https://example.com --ai -p openai -m your-model --base-url http://localhost:1234/v1 --api-key dummy
 ```
 
 ### vLLM
@@ -107,7 +107,7 @@ cewlai -u https://target.com --ai -p openai -m your-model --base-url http://loca
 - **Website**: https://github.com/vllm-project/vllm
 
 ```bash
-cewlai -u https://target.com --ai -p openai -m your-model --base-url http://localhost:8000/v1 --api-key dummy
+cewlai -u https://example.com --ai -p openai -m your-model --base-url http://localhost:8000/v1 --api-key dummy
 ```
 
 ## Custom endpoints
@@ -115,5 +115,5 @@ cewlai -u https://target.com --ai -p openai -m your-model --base-url http://loca
 Any service exposing an OpenAI-compatible `/v1/chat/completions` endpoint works:
 
 ```bash
-cewlai -u https://target.com --ai -p openai -m model-name --base-url https://your-endpoint.com/v1 --api-key your-key
+cewlai -u https://example.com --ai -p openai -m model-name --base-url https://your-endpoint.com/v1 --api-key your-key
 ```
