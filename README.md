@@ -158,6 +158,7 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 | Self-update                | No               | Yes                                         |
 | TLS skip                   | No               | Yes                                         |
 | Obfuscated email detection | No               | Yes                                         |
+| JavaScript parsing         | No               | Yes (jsluice, inline + external .js)        |
 
 ## Library Usage
 

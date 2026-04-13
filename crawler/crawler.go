@@ -29,6 +29,7 @@ type CrawlOptions struct {
 	CaptureSubdomains bool
 	CaptureDomain     bool
 	MaxPages          int
+	Threads           int
 	ProxyURL          string
 	AuthType          string
 	AuthUser          string
@@ -146,7 +147,11 @@ func (s *crawlState) buildCollector() (*colly.Collector, error) {
 	}
 	c.WithTransport(transport)
 
-	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 2})
+	threads := s.opts.Threads
+	if threads < 1 {
+		threads = 2
+	}
+	_ = c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: threads})
 
 	return c, nil
 }
@@ -193,6 +198,12 @@ func (s *crawlState) onResponse(r *colly.Response) {
 		s.processHTML(r)
 	}
 
+	if strings.Contains(contentType, "javascript") || strings.HasSuffix(reqURL, ".js") {
+		s.mu.Lock()
+		extractFromJS(r.Body, s.wordSet)
+		s.mu.Unlock()
+	}
+
 	if s.opts.ExtractMeta {
 		s.processMeta(r.Body, reqURL)
 	}
@@ -209,6 +220,15 @@ func (s *crawlState) processHTML(r *colly.Response) {
 	if err != nil {
 		return
 	}
+
+	// Extract from inline JS before removing script tags
+	doc.Find("script").Each(func(_ int, sel *goquery.Selection) {
+		if js := sel.Text(); js != "" {
+			s.mu.Lock()
+			extractFromJS([]byte(js), s.wordSet)
+			s.mu.Unlock()
+		}
+	})
 
 	doc.Find("script, style").Remove()
 
