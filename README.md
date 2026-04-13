@@ -216,6 +216,10 @@ func main() {
 | `words`   | `github.com/Chocapikk/cewlai/words`   | Word splitting, filtering, dedup, counting, grouping             |
 | `ai`      | `github.com/Chocapikk/cewlai/ai`      | LLM providers, prompt modes, response parsing                    |
 
+## Origin
+
+CeWL has been the go-to wordlist generator since 2012, but it was built in a pre-AI era. It just looks for words on the webpage and that's it. The idea behind this project came from a simple observation: CeWL is kind of old and probably pre-AI, so someone could probably make a more accurate version that uses AI to generate "like words", "industry similar terms", and contextually related passwords. We figured it probably already existed. It didn't.
+
 ## Credits
 
 Created by [@Chocapikk](https://github.com/Chocapikk). Original idea by [@stlthr4k3r](https://github.com/stlthr4k3r).
