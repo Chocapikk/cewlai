@@ -159,6 +159,57 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 | TLS skip                   | No               | Yes                                         |
 | Obfuscated email detection | No               | Yes                                         |
 
+## Library Usage
+
+The packages are importable for use in your own Go tools:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/Chocapikk/cewlai/ai"
+	"github.com/Chocapikk/cewlai/crawler"
+	"github.com/Chocapikk/cewlai/words"
+)
+
+func main() {
+	// Crawl a target
+	result, _ := crawler.Crawl(crawler.CrawlOptions{
+		URL:           "https://example.com",
+		Depth:         2,
+		UserAgent:     "mybot/1.0",
+		ExtractEmails: true,
+		ExtractMeta:   true,
+	})
+
+	// Filter and deduplicate
+	filtered := words.FilterWords(result.Words, 3, 0, true)
+	filtered = words.DeduplicateWords(filtered)
+
+	// AI enrichment
+	provider, _ := ai.NewAIProvider("groq", "", "", "")
+	prompt := ai.ResolvePrompt("passwords", "")
+	aiWords, _ := provider.GenerateWords(context.Background(), result, prompt)
+
+	// Merge everything
+	final := words.DeduplicateWords(filtered, aiWords)
+	for _, w := range final {
+		fmt.Println(w)
+	}
+}
+```
+
+### Available packages
+
+| Package   | Import                                | Description                                                      |
+| --------- | ------------------------------------- | ---------------------------------------------------------------- |
+| `crawler` | `github.com/Chocapikk/cewlai/crawler` | Web crawling, email extraction, metadata extraction, URL capture |
+| `words`   | `github.com/Chocapikk/cewlai/words`   | Word splitting, filtering, dedup, counting, grouping             |
+| `ai`      | `github.com/Chocapikk/cewlai/ai`      | LLM providers, prompt modes, response parsing                    |
+
 ## Credits
 
 Created by [@Chocapikk](https://github.com/Chocapikk). Original idea by [@stlthr4k3r](https://github.com/stlthr4k3r).
