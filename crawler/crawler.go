@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"golang.org/x/net/html"
 
@@ -35,6 +36,8 @@ type CrawlOptions struct {
 	MaxPages          int
 	Threads           int
 	MaxContext        int
+	NoCache           bool
+	CacheTTL          time.Duration
 	ProxyURL          string
 	AuthType          string
 	AuthUser          string
@@ -94,6 +97,16 @@ func (s *crawlState) addEmail(email string) {
 }
 
 func Crawl(ctx context.Context, opts CrawlOptions) (*CrawlResult, error) {
+	if !opts.NoCache {
+		ttl := opts.CacheTTL
+		if ttl == 0 {
+			ttl = time.Hour
+		}
+		if cached, ok := loadCache(opts.URL, opts.Depth, ttl); ok {
+			return cached, nil
+		}
+	}
+
 	parsed, err := url.Parse(opts.URL)
 	if err != nil {
 		return nil, fmt.Errorf("invalid URL: %w", err)
@@ -141,7 +154,7 @@ func Crawl(ctx context.Context, opts CrawlOptions) (*CrawlResult, error) {
 		ctxText = ctxText[:limit]
 	}
 
-	return &CrawlResult{
+	result := &CrawlResult{
 		Words:    mapKeys(s.wordSet),
 		Emails:   mapKeys(s.emailSet),
 		Metadata: mapKeys(s.metaSet),
@@ -149,7 +162,13 @@ func Crawl(ctx context.Context, opts CrawlOptions) (*CrawlResult, error) {
 		URL:      opts.URL,
 		Title:    s.title,
 		Pages:    s.pages,
-	}, nil
+	}
+
+	if !opts.NoCache {
+		saveCache(opts.URL, opts.Depth, result)
+	}
+
+	return result, nil
 }
 
 func (s *crawlState) buildCollector() (*colly.Collector, error) {

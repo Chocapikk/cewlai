@@ -82,6 +82,8 @@ type CLI struct {
 	CapturePaths      bool     `help:"Add URL path components to wordlist" name:"capture-paths"`
 	CaptureSubdomains bool     `help:"Add subdomains to wordlist" name:"capture-subdomains"`
 	CaptureDomain     bool     `help:"Add domain to wordlist" name:"capture-domain"`
+	NoCache           bool     `help:"Disable crawl cache" name:"no-cache"`
+	CacheTTL          int      `default:"60" help:"Cache TTL in minutes" name:"cache-ttl"`
 }
 
 func main() {
@@ -141,6 +143,8 @@ func main() {
 		AuthPass:          cli.AuthPass,
 		Headers:           cli.Header,
 		ExcludePaths:      excludePaths,
+		NoCache:           cli.NoCache,
+		CacheTTL:          time.Duration(cli.CacheTTL) * time.Minute,
 	}
 
 	logInfo("Starting crawl on %s (depth: %d)", targetURL, cli.Depth)
