@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -93,39 +92,7 @@ func (s *crawlState) contextLimit() int {
 }
 
 func (s *crawlState) buildContext() string {
-	limit := s.contextLimit()
-	if len(s.pageContexts) == 0 {
-		return ""
-	}
-
-	// Shuffle pages so AI sees different context each run
-	shuffled := make([]string, len(s.pageContexts))
-	copy(shuffled, s.pageContexts)
-	rand.Shuffle(len(shuffled), func(i, j int) {
-		shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
-	})
-
-	// Distribute evenly across all pages
-	perPage := limit / len(shuffled)
-
-	var b strings.Builder
-	for _, page := range shuffled {
-		if b.Len() >= limit {
-			break
-		}
-		chunk := page
-		if len(chunk) > perPage {
-			chunk = chunk[:perPage]
-		}
-		b.WriteString(chunk)
-		b.WriteString(" ")
-	}
-
-	result := b.String()
-	if len(result) > limit {
-		result = result[:limit]
-	}
-	return result
+	return buildContextFromPages(s.pageContexts, s.contextLimit())
 }
 
 func (s *crawlState) addEmail(email string) {
