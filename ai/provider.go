@@ -128,13 +128,28 @@ func NewAIProvider(provider, apiKey, model, baseURL string) (AIProvider, error) 
 		if apiKey == "" {
 			apiKey = os.Getenv(preset.envKey)
 		}
+		if apiKey == "" {
+			return nil, fmt.Errorf("no API key for %s. Set %s or use --api-key", provider, preset.envKey)
+		}
 		return newOpenAIProvider(apiKey, model, baseURL), nil
 	}
 
 	switch p {
 	case "anthropic":
+		if apiKey == "" {
+			apiKey = os.Getenv("ANTHROPIC_API_KEY")
+		}
+		if apiKey == "" && baseURL == "" {
+			return nil, fmt.Errorf("no API key for anthropic. Set ANTHROPIC_API_KEY or use --api-key")
+		}
 		return newAnthropicProvider(apiKey, model, baseURL), nil
 	case "openai":
+		if apiKey == "" {
+			apiKey = os.Getenv("OPENAI_API_KEY")
+		}
+		if apiKey == "" && baseURL == "" {
+			return nil, fmt.Errorf("no API key for openai. Set OPENAI_API_KEY or use --api-key")
+		}
 		return newOpenAIProvider(apiKey, model, baseURL), nil
 	default:
 		return nil, fmt.Errorf("unknown provider: %s (supported: anthropic, openai, groq, openrouter, cerebras, huggingface)", provider)

@@ -43,8 +43,9 @@ type CLI struct {
 	AI        bool   `help:"Enable AI enrichment"`
 	Provider  string `short:"p" help:"AI provider: anthropic, openai, groq, openrouter, cerebras, huggingface"`
 	Model     string `short:"m" help:"Model name or shorthand"`
-	APIKey    string `help:"API key (or use env vars)" name:"api-key"`
-	BaseURL   string `help:"Custom API base URL for OpenAI-compatible endpoints" name:"base-url"`
+	APIKey     string `help:"API key (or use env vars)" name:"api-key"`
+	BaseURL    string `help:"Custom API base URL for OpenAI-compatible endpoints" name:"base-url"`
+	ListModels bool   `help:"List available models for the selected provider" name:"list-models"`
 	Mode      string `default:"default" help:"AI prompt mode: default, passwords, dirs, subdomains, geo"`
 	Prompt    string `help:"Custom AI system prompt (overrides --mode)"`
 	AIWords   int    `default:"200" help:"Number of AI-generated words" name:"ai-words"`
@@ -92,6 +93,11 @@ func main() {
 
 	if cli.Update {
 		selfUpdate()
+		return
+	}
+
+	if cli.ListModels {
+		ai.ListModels(cli.Provider, cli.APIKey, cli.BaseURL)
 		return
 	}
 
