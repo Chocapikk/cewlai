@@ -1,5 +1,10 @@
 # CeWL AI
 
+[![Go CI](https://github.com/Chocapikk/cewlai/actions/workflows/go.yml/badge.svg)](https://github.com/Chocapikk/cewlai/actions/workflows/go.yml)
+[![Release](https://img.shields.io/github/v/release/Chocapikk/cewlai)](https://github.com/Chocapikk/cewlai/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Chocapikk/cewlai)](https://goreportcard.com/report/github.com/Chocapikk/cewlai)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 AI-powered custom wordlist generator. Crawls websites and uses LLMs to generate contextually related words that don't appear on the page - industry jargon, likely passwords, related terminology.
 
 Built on top of the classic [CeWL](https://github.com/digininja/CeWL) concept, rewritten in Go with AI enrichment.
