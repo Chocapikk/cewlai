@@ -53,16 +53,17 @@ type CrawlResult struct {
 
 type crawlState struct {
 	mu         sync.Mutex
-	wordSet    map[string]struct{}
-	emailSet   map[string]struct{}
-	metaSet    map[string]struct{}
-	contextBuf strings.Builder
-	title      string
-	pages      int
-	opts       CrawlOptions
-	baseURL    *url.URL
-	excludeSet map[string]struct{}
-	headerMap  map[string]string
+	wordSet            map[string]struct{}
+	emailSet           map[string]struct{}
+	metaSet            map[string]struct{}
+	contextBuf         strings.Builder
+	title              string
+	pages              int
+	opts               CrawlOptions
+	baseURL            *url.URL
+	excludeSet         map[string]struct{}
+	headerMap          map[string]string
+	resourceCollector  *colly.Collector
 }
 
 func (s *crawlState) addWords(text string) {
@@ -111,12 +112,19 @@ func Crawl(opts CrawlOptions) (*CrawlResult, error) {
 		return nil, err
 	}
 
+	rc := c.Clone()
+	rc.MaxDepth = 0
+	s.resourceCollector = rc
+	rc.OnResponse(s.onResponse)
+	rc.OnError(s.onError)
+
 	s.registerCallbacks(c)
 
 	if err := c.Visit(opts.URL); err != nil {
 		return nil, fmt.Errorf("failed to start crawl: %w", err)
 	}
 	c.Wait()
+	rc.Wait()
 
 	ctx := s.contextBuf.String()
 	limit := s.contextLimit()
@@ -376,11 +384,16 @@ func (s *crawlState) extractEmails(doc *goquery.Document, r *colly.Response) {
 }
 
 func (s *crawlState) followLinks(doc *goquery.Document, r *colly.Response) {
-	selectors := []struct {
+	doc.Find("a[href]").Each(func(_ int, sel *goquery.Selection) {
+		if val, exists := sel.Attr("href"); exists {
+			_ = r.Request.Visit(r.Request.AbsoluteURL(val))
+		}
+	})
+
+	resources := []struct {
 		query string
 		attr  string
 	}{
-		{"a[href]", "href"},
 		{"script[src]", "src"},
 		{"link[href]", "href"},
 		{"img[src]", "src"},
@@ -391,10 +404,10 @@ func (s *crawlState) followLinks(doc *goquery.Document, r *colly.Response) {
 		{"track[src]", "src"},
 	}
 
-	for _, s := range selectors {
-		doc.Find(s.query).Each(func(_ int, sel *goquery.Selection) {
-			if val, exists := sel.Attr(s.attr); exists {
-				_ = r.Request.Visit(r.Request.AbsoluteURL(val))
+	for _, res := range resources {
+		doc.Find(res.query).Each(func(_ int, sel *goquery.Selection) {
+			if val, exists := sel.Attr(res.attr); exists {
+				_ = s.resourceCollector.Visit(r.Request.AbsoluteURL(val))
 			}
 		})
 	}

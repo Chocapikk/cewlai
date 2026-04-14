@@ -32,7 +32,7 @@ func getBanner() string {
 type CLI struct {
 	URL       string `arg:"" optional:"" help:"Target URL to crawl"`
 	Url       string `short:"u" help:"Target URL to crawl" name:"url"`
-	Depth     int    `short:"d" default:"4" help:"Crawl depth"`
+	Depth     int    `short:"d" default:"2" help:"Crawl depth"`
 	Output    string `short:"o" help:"Output file (default: stdout)"`
 	UserAgent string `default:"cewlai/1.0" help:"User agent for crawler" name:"user-agent"`
 	Verbose   bool   `short:"v" help:"Verbose output"`
