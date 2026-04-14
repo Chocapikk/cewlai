@@ -5,8 +5,10 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/Chocapikk/cewlai/ai"
 	"github.com/Chocapikk/cewlai/crawler"
@@ -143,12 +145,25 @@ func main() {
 
 	logInfo("Starting crawl on %s (depth: %d)", targetURL, cli.Depth)
 
-	result, err := crawler.Crawl(opts)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	go func() {
+		<-sig
+		fmt.Fprintf(os.Stderr, "\r\033[K")
+		logResult("Interrupted, saving partial results...")
+		cancel()
+	}()
+
+	start := time.Now()
+	result, err := crawler.Crawl(ctx, opts)
 	if err != nil {
 		logFatal("Crawl failed: %v", err)
 	}
 
-	logResult("Crawled %d pages, extracted %d raw words", result.Pages, len(result.Words))
+	logResult("Crawled %d pages, extracted %d raw words in %.1fs", result.Pages, len(result.Words), time.Since(start).Seconds())
 
 	crawlWords := words.FilterWords(result.Words, cli.MinWordLength, cli.MaxWordLength, cli.WithNumbers)
 	if cli.Lowercase {

@@ -2,12 +2,14 @@ package crawler
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 
@@ -91,7 +93,7 @@ func (s *crawlState) addEmail(email string) {
 	}
 }
 
-func Crawl(opts CrawlOptions) (*CrawlResult, error) {
+func Crawl(ctx context.Context, opts CrawlOptions) (*CrawlResult, error) {
 	parsed, err := url.Parse(opts.URL)
 	if err != nil {
 		return nil, fmt.Errorf("invalid URL: %w", err)
@@ -120,23 +122,30 @@ func Crawl(opts CrawlOptions) (*CrawlResult, error) {
 
 	s.registerCallbacks(c)
 
+	go func() {
+		<-ctx.Done()
+		c.AllowedDomains = []string{}
+		rc.AllowedDomains = []string{}
+	}()
+
 	if err := c.Visit(opts.URL); err != nil {
 		return nil, fmt.Errorf("failed to start crawl: %w", err)
 	}
 	c.Wait()
 	rc.Wait()
+	fmt.Fprintf(os.Stderr, "\r\033[K")
 
-	ctx := s.contextBuf.String()
+	ctxText := s.contextBuf.String()
 	limit := s.contextLimit()
-	if len(ctx) > limit {
-		ctx = ctx[:limit]
+	if len(ctxText) > limit {
+		ctxText = ctxText[:limit]
 	}
 
 	return &CrawlResult{
 		Words:    mapKeys(s.wordSet),
 		Emails:   mapKeys(s.emailSet),
 		Metadata: mapKeys(s.metaSet),
-		Context:  ctx,
+		Context:  ctxText,
 		URL:      opts.URL,
 		Title:    s.title,
 		Pages:    s.pages,
@@ -145,7 +154,7 @@ func Crawl(opts CrawlOptions) (*CrawlResult, error) {
 
 func (s *crawlState) buildCollector() (*colly.Collector, error) {
 	collectorOpts := []colly.CollectorOption{
-		colly.MaxDepth(s.opts.Depth),
+		colly.MaxDepth(s.opts.Depth + 1), // colly starts at depth 1, CeWL at depth 0
 		colly.UserAgent(s.opts.UserAgent),
 	}
 	if !s.opts.Offsite {
@@ -194,6 +203,11 @@ func (s *crawlState) onRequest(r *colly.Request) {
 		return
 	}
 	s.pages++
+	if s.opts.Verbose {
+		log.Printf("Crawling: %s", r.URL.String())
+	} else {
+		fmt.Fprintf(os.Stderr, "\r[*] Crawling: %d pages discovered", s.pages)
+	}
 	s.mu.Unlock()
 
 	if _, excluded := s.excludeSet[r.URL.Path]; excluded {
@@ -207,10 +221,6 @@ func (s *crawlState) onRequest(r *colly.Request) {
 	}
 	for k, v := range s.headerMap {
 		r.Headers.Set(k, v)
-	}
-
-	if s.opts.Verbose {
-		log.Printf("Crawling: %s", r.URL.String())
 	}
 }
 
