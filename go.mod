@@ -7,6 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.11.0
 	github.com/alecthomas/kong v1.15.0
 	github.com/anthropics/anthropic-sdk-go v1.35.0
+	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8
 	github.com/gocolly/colly/v2 v2.3.0
 	github.com/openai/openai-go v1.12.0
 )

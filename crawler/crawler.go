@@ -222,6 +222,16 @@ func (s *crawlState) onResponse(r *colly.Response) {
 		s.mu.Unlock()
 	}
 
+	if strings.HasSuffix(reqURL, ".vtt") || strings.HasSuffix(reqURL, ".srt") {
+		s.mu.Lock()
+		extractSubtitles(r.Body, s.wordSet)
+		s.mu.Unlock()
+	}
+
+	if strings.Contains(contentType, "audio") || strings.Contains(contentType, "video") {
+		extractMediaMetadata(r.Body, &s.mu, s.wordSet)
+	}
+
 	if s.opts.ExtractMeta {
 		s.processMeta(r.Body, reqURL)
 	}
@@ -333,6 +343,7 @@ func (s *crawlState) followLinks(doc *goquery.Document, r *colly.Response) {
 		{"source[src]", "src"},
 		{"video[src]", "src"},
 		{"audio[src]", "src"},
+		{"track[src]", "src"},
 	}
 
 	for _, s := range selectors {
