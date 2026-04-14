@@ -26,7 +26,7 @@ func TestNewSecretScanner(t *testing.T) {
 
 func TestScanShortData(t *testing.T) {
 	s := NewSecretScanner()
-	got := s.Scan("abc", "test.txt")
+	got := s.Scan([]byte("abc"), "test.txt")
 	if got != nil {
 		t.Errorf("expected nil for short data, got %v", got)
 	}
@@ -34,7 +34,7 @@ func TestScanShortData(t *testing.T) {
 
 func TestScanNoSecrets(t *testing.T) {
 	s := NewSecretScanner()
-	got := s.Scan("This is a completely normal sentence with no secrets at all.", "readme.md")
+	got := s.Scan([]byte("This is a completely normal sentence with no secrets at all."), "readme.md")
 	if len(got) != 0 {
 		t.Errorf("expected no findings for benign text, got %d", len(got))
 	}
@@ -86,7 +86,7 @@ func TestScanFindsSecrets(t *testing.T) {
 	s := NewSecretScanner()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			results := s.Scan(tt.input, "test-source")
+			results := s.Scan([]byte(tt.input), "test-source")
 			found := len(results) > 0
 			if found != tt.wantFind {
 				if tt.wantFind {
@@ -126,5 +126,25 @@ func TestHasKeyword(t *testing.T) {
 		if got != tt.want {
 			t.Errorf("hasKeyword(%q, %v) = %v, want %v", tt.data, tt.keywords, got, tt.want)
 		}
+	}
+}
+
+func BenchmarkScan_NoSecrets(b *testing.B) {
+	s := NewSecretScanner()
+	data := []byte("This is a normal document with no secrets, just some regular text content about a company and their products")
+	b.ResetTimer()
+	b.ReportAllocs()
+	for b.Loop() {
+		s.Scan(data, "bench.txt")
+	}
+}
+
+func BenchmarkScan_WithSecret(b *testing.B) {
+	s := NewSecretScanner()
+	data := []byte("config: sk_live_51" + randomHex(40))
+	b.ResetTimer()
+	b.ReportAllocs()
+	for b.Loop() {
+		s.Scan(data, "bench.txt")
 	}
 }

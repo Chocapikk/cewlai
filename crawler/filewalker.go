@@ -49,7 +49,7 @@ func processFiles(proto string, files []discoveredFile, wordSet map[string]struc
 		mu.Unlock()
 
 		if scanner != nil {
-			findings := scanner.Scan(string(body), f.path)
+			findings := scanner.Scan(body, f.path)
 			mu.Lock()
 			for _, s := range findings {
 				secrets = append(secrets, fmt.Sprintf("[%s] %s (source: %s)", s.DetectorName, s.Raw, s.Source))

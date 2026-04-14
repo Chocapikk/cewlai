@@ -251,7 +251,7 @@ func (s *crawlState) onResponse(r *colly.Response) {
 	}
 
 	if s.scanner != nil && len(r.Body) > 0 {
-		findings := s.scanner.Scan(string(r.Body), reqURL)
+		findings := s.scanner.Scan(r.Body, reqURL)
 		if len(findings) > 0 {
 			s.mu.Lock()
 			for _, f := range findings {

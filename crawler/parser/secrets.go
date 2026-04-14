@@ -3,10 +3,17 @@ package parser
 import (
 	"context"
 	"strings"
+	"unsafe"
 
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/engine/defaults"
 )
+
+// unsafeString creates a string from a byte slice without copying.
+// The caller must ensure the byte slice is not modified while the string is in use.
+func unsafeString(b []byte) string {
+	return unsafe.String(unsafe.SliceData(b), len(b))
+}
 
 type SecretFinding struct {
 	DetectorName string `json:"detector"`
@@ -25,21 +32,23 @@ func NewSecretScanner() *SecretScanner {
 	}
 }
 
-func (s *SecretScanner) Scan(data, source string) []SecretFinding {
+// Scan checks data for secrets using trufflehog detectors.
+// Accepts []byte directly to avoid unnecessary string/byte conversions.
+func (s *SecretScanner) Scan(data []byte, source string) []SecretFinding {
 	if len(data) < 8 {
 		return nil
 	}
 
 	ctx := context.Background()
-	dataBytes := []byte(data)
+	dataStr := unsafeString(data)
 	var findings []SecretFinding
 
 	for _, detector := range s.detectors {
-		if !hasKeyword(data, detector.Keywords()) {
+		if !hasKeyword(dataStr, detector.Keywords()) {
 			continue
 		}
 
-		results, err := detector.FromData(ctx, false, dataBytes)
+		results, err := detector.FromData(ctx, false, data)
 		if err != nil {
 			continue
 		}
