@@ -199,45 +199,60 @@ func (s *crawlState) onRequest(r *colly.Request) {
 	}
 }
 
+func matchType(contentType, reqURL string, types []string, exts []string) bool {
+	for _, t := range types {
+		if strings.Contains(contentType, t) {
+			return true
+		}
+	}
+	lower := strings.ToLower(reqURL)
+	for _, ext := range exts {
+		if strings.HasSuffix(lower, ext) {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *crawlState) onResponse(r *colly.Response) {
 	contentType := r.Headers.Get("Content-Type")
 	reqURL := r.Request.URL.String()
 
-	if strings.Contains(contentType, "text/html") {
+	if matchType(contentType, reqURL, []string{"text/html"}, []string{".html", ".htm"}) {
 		s.processHTML(r)
 	}
 
-	if strings.Contains(contentType, "javascript") || strings.HasSuffix(reqURL, ".js") {
+	if matchType(contentType, reqURL, []string{"javascript", "ecmascript"}, []string{".js", ".mjs"}) {
 		s.mu.Lock()
 		extractFromJS(r.Body, s.wordSet)
 		s.mu.Unlock()
 	}
 
-	if strings.Contains(contentType, "xml") || strings.HasSuffix(reqURL, ".xml") || strings.HasSuffix(reqURL, ".svg") {
+	if matchType(contentType, reqURL, []string{"xml", "svg"}, []string{".xml", ".svg", ".rss", ".atom", ".sitemap"}) {
 		s.mu.Lock()
 		extractFromXML(r.Body, s.wordSet)
 		s.mu.Unlock()
 	}
 
-	if strings.Contains(contentType, "json") || strings.HasSuffix(reqURL, ".json") {
+	if matchType(contentType, reqURL, []string{"json"}, []string{".json", ".webmanifest"}) {
 		s.mu.Lock()
 		extractFromJSON(r.Body, s.wordSet)
 		s.mu.Unlock()
 	}
 
-	if strings.Contains(contentType, "css") || strings.HasSuffix(reqURL, ".css") {
+	if matchType(contentType, reqURL, []string{"css"}, []string{".css"}) {
 		s.mu.Lock()
 		extractFromCSS(r.Body, s.wordSet)
 		s.mu.Unlock()
 	}
 
-	if strings.HasSuffix(reqURL, ".vtt") || strings.HasSuffix(reqURL, ".srt") {
+	if matchType(contentType, reqURL, []string{"text/vtt", "subrip"}, []string{".vtt", ".srt"}) {
 		s.mu.Lock()
 		extractSubtitles(r.Body, s.wordSet)
 		s.mu.Unlock()
 	}
 
-	if strings.Contains(contentType, "audio") || strings.Contains(contentType, "video") {
+	if matchType(contentType, reqURL, []string{"audio", "video"}, []string{".mp3", ".mp4", ".ogg", ".flac", ".wav", ".m4a", ".webm"}) {
 		extractMediaMetadata(r.Body, &s.mu, s.wordSet)
 	}
 
