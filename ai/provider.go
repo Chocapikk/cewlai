@@ -111,7 +111,7 @@ var providerPresets = map[string]struct {
 }{
 	"groq":        {"https://api.groq.com/openai/v1", "llama-3.3-70b-versatile", "GROQ_API_KEY"},
 	"openrouter":  {"https://openrouter.ai/api/v1", "openrouter/free", "OPENROUTER_API_KEY"},
-	"cerebras":    {"https://api.cerebras.ai/v1", "llama-3.3-70b", "CEREBRAS_API_KEY"},
+	"cerebras":    {"https://api.cerebras.ai/v1", "llama3.1-8b", "CEREBRAS_API_KEY"},
 	"huggingface": {"https://router.huggingface.co/v1", "meta-llama/Llama-3.3-70B-Instruct", "HF_TOKEN"},
 }
 
