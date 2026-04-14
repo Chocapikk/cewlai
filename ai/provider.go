@@ -11,7 +11,11 @@ import (
 
 const outputRule = `
 
-IMPORTANT: Every word you generate MUST be directly derived from the context provided. Do not generate random or generic words. Base everything on what the site actually contains.
+IMPORTANT:
+- Every word MUST be contextually related but NOT appear on the website.
+- Do NOT concatenate or combine words from the site (e.g. CompanyName2024, NameCity). Mutations are handled separately.
+- Generate NEW words: related industry terms, tools, technologies, organizations, roles, locations, and jargon that someone in this context would know but that are not explicitly on the page.
+- Each word should be a single standalone term, not a compound.
 
 Output ONLY words separated by commas on a single line. No explanations, no numbering, no markdown, no sentences. Example: word1,word2,word3`
 
