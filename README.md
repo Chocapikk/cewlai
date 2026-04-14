@@ -40,7 +40,22 @@ cewlai -u https://example.com --ai -p anthropic -m sonnet
 With a free provider:
 
 ```bash
+export GROQ_API_KEY=gsk_...
 cewlai -u https://example.com --ai -p groq
+```
+
+Don't know which models are available? List them:
+
+```bash
+cewlai --list-models -p groq
+cewlai --list-models -p cerebras
+```
+
+No API key? The tool tells you what to set:
+
+```
+$ cewlai -u https://example.com --ai -p groq
+[-] AI provider error: no API key for groq. Set GROQ_API_KEY or use --api-key
 ```
 
 Full example:
@@ -76,6 +91,8 @@ Flags:
       --api-key=STRING             API key (or use env vars)
       --base-url=STRING            Custom API base URL for OpenAI-compatible
                                    endpoints
+      --list-models                List available models for the selected
+                                   provider
       --mode="default"             AI prompt mode: default, passwords, dirs,
                                    subdomains, geo
       --prompt=STRING              Custom AI system prompt (overrides --mode)
