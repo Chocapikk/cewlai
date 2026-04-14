@@ -11,8 +11,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/Chocapikk/cewlai/words"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -244,7 +244,6 @@ func (s *crawlState) onResponse(r *colly.Response) {
 		}
 	}
 	s.mu.Unlock()
-
 
 	if s.opts.ExtractMeta {
 		s.processMeta(r.Body, reqURL)

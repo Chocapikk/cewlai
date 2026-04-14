@@ -40,15 +40,15 @@ type CLI struct {
 	Update    bool   `help:"Self-update to latest release"`
 
 	// AI
-	AI       bool   `help:"Enable AI enrichment"`
-	Provider string `short:"p" help:"AI provider: anthropic, openai, groq, openrouter, cerebras, huggingface"`
-	Model    string `short:"m" help:"Model name or shorthand"`
-	APIKey   string `help:"API key (or use env vars)" name:"api-key"`
-	BaseURL  string `help:"Custom API base URL for OpenAI-compatible endpoints" name:"base-url"`
-	Mode     string `default:"default" help:"AI prompt mode: default, passwords, dirs, subdomains, geo"`
-	Prompt   string `help:"Custom AI system prompt (overrides --mode)"`
-	AIWords   int `default:"200" help:"Number of AI-generated words" name:"ai-words"`
-	AIContext int `default:"4000" help:"Max characters of context sent to LLM" name:"ai-context"`
+	AI        bool   `help:"Enable AI enrichment"`
+	Provider  string `short:"p" help:"AI provider: anthropic, openai, groq, openrouter, cerebras, huggingface"`
+	Model     string `short:"m" help:"Model name or shorthand"`
+	APIKey    string `help:"API key (or use env vars)" name:"api-key"`
+	BaseURL   string `help:"Custom API base URL for OpenAI-compatible endpoints" name:"base-url"`
+	Mode      string `default:"default" help:"AI prompt mode: default, passwords, dirs, subdomains, geo"`
+	Prompt    string `help:"Custom AI system prompt (overrides --mode)"`
+	AIWords   int    `default:"200" help:"Number of AI-generated words" name:"ai-words"`
+	AIContext int    `default:"4000" help:"Max characters of context sent to LLM" name:"ai-context"`
 
 	// Extraction
 	Email     bool   `short:"e" help:"Extract email addresses"`
@@ -57,12 +57,12 @@ type CLI struct {
 	MetaFile  string `help:"Write metadata to file" name:"meta-file"`
 
 	// Word processing
-	MinWordLength int  `default:"3" help:"Minimum word length" name:"min-word-length"`
-	MaxWordLength int  `default:"0" help:"Maximum word length (0 = no limit)" name:"max-word-length"`
-	Lowercase     bool `help:"Lowercase all words"`
-	WithNumbers   bool `default:"true" help:"Include words with numbers" name:"with-numbers"`
-	Count         bool `short:"c" help:"Show word frequency count"`
-	Groups        int  `short:"g" default:"0" help:"Generate word groups of N"`
+	MinWordLength int    `default:"3" help:"Minimum word length" name:"min-word-length"`
+	MaxWordLength int    `default:"0" help:"Maximum word length (0 = no limit)" name:"max-word-length"`
+	Lowercase     bool   `help:"Lowercase all words"`
+	WithNumbers   bool   `default:"true" help:"Include words with numbers" name:"with-numbers"`
+	Count         bool   `short:"c" help:"Show word frequency count"`
+	Groups        int    `short:"g" default:"0" help:"Generate word groups of N"`
 	Mutate        bool   `help:"Generate word mutations (leet, reverse, suffixes like CUPP)"`
 	MutateConfig  string `help:"Custom mutation config file (JSON)" name:"mutate-config"`
 

@@ -8,16 +8,16 @@ import (
 )
 
 type MutateConfig struct {
-	Leet         map[string]string `json:"leet"`
-	Suffixes     []string          `json:"suffixes"`
-	Prefixes     []string          `json:"prefixes"`
-	Capitalize   bool              `json:"capitalize"`
-	Uppercase    bool              `json:"uppercase"`
-	Lowercase    bool              `json:"lowercase"`
-	Reverse      bool              `json:"reverse"`
-	LeetEnabled  bool              `json:"leet_enabled"`
-	MinLength    int               `json:"min_length"`
-	MaxLength    int               `json:"max_length"`
+	Leet        map[string]string `json:"leet"`
+	Suffixes    []string          `json:"suffixes"`
+	Prefixes    []string          `json:"prefixes"`
+	Capitalize  bool              `json:"capitalize"`
+	Uppercase   bool              `json:"uppercase"`
+	Lowercase   bool              `json:"lowercase"`
+	Reverse     bool              `json:"reverse"`
+	LeetEnabled bool              `json:"leet_enabled"`
+	MinLength   int               `json:"min_length"`
+	MaxLength   int               `json:"max_length"`
 }
 
 func DefaultMutateConfig() MutateConfig {
