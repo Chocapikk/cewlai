@@ -102,6 +102,14 @@ func (s *crawlState) addEmail(email string) {
 }
 
 func Crawl(ctx context.Context, opts CrawlOptions) (*CrawlResult, error) {
+	src, err := NewSource(opts.URL)
+	if err != nil {
+		return nil, err
+	}
+	return src.Crawl(ctx, opts)
+}
+
+func crawlHTTP(ctx context.Context, opts CrawlOptions) (*CrawlResult, error) {
 	if !opts.NoCache {
 		ttl := opts.CacheTTL
 		if ttl == 0 {

@@ -162,15 +162,7 @@ func main() {
 	}()
 
 	start := time.Now()
-	var result *crawler.CrawlResult
-	var err error
-
-	if strings.HasPrefix(targetURL, "ftp://") {
-		addr := strings.TrimPrefix(targetURL, "ftp://")
-		result, err = crawler.CrawlFTP(addr, cli.AuthUser, cli.AuthPass, opts)
-	} else {
-		result, err = crawler.Crawl(ctx, opts)
-	}
+	result, err := crawler.Crawl(ctx, opts)
 	if err != nil {
 		logFatal("Crawl failed: %v", err)
 	}

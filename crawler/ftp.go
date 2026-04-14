@@ -14,7 +14,7 @@ import (
 	"github.com/jlaffaye/ftp"
 )
 
-func CrawlFTP(addr, user, pass string, opts CrawlOptions) (*CrawlResult, error) {
+func crawlFTP(addr, user, pass string, opts CrawlOptions) (*CrawlResult, error) {
 	if user == "" {
 		user = "anonymous"
 	}
