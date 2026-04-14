@@ -14,6 +14,7 @@ import (
 	"github.com/Chocapikk/cewlai/crawler"
 	"github.com/Chocapikk/cewlai/words"
 	"github.com/alecthomas/kong"
+	kongcompletion "github.com/jotaen/kong-completion"
 )
 
 var version = "dev"
@@ -34,7 +35,6 @@ func getBanner() string {
 
 type CLI struct {
 	// Target
-	URL       string `arg:"" optional:"" help:"Target URL to crawl" group:"Target"`
 	Url       string `short:"u" help:"Target URL to crawl" name:"url" group:"Target"`
 	Depth     int    `short:"d" default:"2" help:"Crawl depth" group:"Target"`
 	Output    string `short:"o" help:"Output file (default: stdout)" group:"Target"`
@@ -73,7 +73,7 @@ type CLI struct {
 	MaxWordLength int    `default:"0" help:"Maximum word length (0 = no limit)" name:"max-word-length" group:"Words"`
 	Lowercase     bool   `help:"Lowercase all words" group:"Words"`
 	WithNumbers   bool   `default:"true" help:"Include words with numbers" name:"with-numbers" group:"Words"`
-	Count         bool   `short:"c" help:"Show word frequency count" group:"Words"`
+	Count         bool   `help:"Show word frequency count" group:"Words"`
 	Groups        int    `short:"g" default:"0" help:"Generate word groups of N" group:"Words"`
 	Mutate        bool   `help:"Generate word mutations (leet, reverse, suffixes like CUPP)" group:"Words"`
 	MutateConfig  string `help:"Custom mutation config file (JSON)" name:"mutate-config" group:"Words"`
@@ -89,11 +89,27 @@ type CLI struct {
 	Prompt     string `help:"Custom AI system prompt (overrides --mode)" group:"AI"`
 	AIWords    int    `default:"200" help:"Number of AI-generated words" name:"ai-words" group:"AI"`
 	AIContext  int    `default:"4000" help:"Max characters of context sent to LLM" name:"ai-context" group:"AI"`
+
+	// Shell completion
+	Completion kongcompletion.Completion `cmd:"" help:"Output shell completion code (bash, zsh, fish)" hidden:""`
 }
 
 func main() {
 	var cli CLI
-	kong.Parse(&cli, kong.Name("cewlai"), kong.Description("AI-Powered Wordlist Generator & Target Recon Tool"))
+	parser := kong.Must(&cli,
+		kong.Name("cewlai"),
+		kong.Description("AI-Powered Wordlist Generator & Target Recon Tool"),
+		kong.UsageOnError(),
+		kong.ConfigureHelp(kong.HelpOptions{NoAppSummary: true}),
+	)
+	kongcompletion.Register(parser)
+	kongCtx, err := parser.Parse(os.Args[1:])
+	parser.FatalIfErrorf(err)
+
+	if strings.HasPrefix(kongCtx.Command(), "completion") {
+		_ = kongCtx.Run()
+		return
+	}
 
 	if cli.Version {
 		fmt.Println("cewlai " + version)
@@ -110,14 +126,11 @@ func main() {
 		return
 	}
 
-	fmt.Fprintln(os.Stderr, colorize(cyan, getBanner()))
+	_, _ = fmt.Fprintln(os.Stderr, colorize(cyan, getBanner()))
 
 	verboseMode = cli.Verbose
 
 	targetURL := cli.Url
-	if targetURL == "" {
-		targetURL = cli.URL
-	}
 	if targetURL == "" {
 		logFatal("-u (URL) is required")
 	}
@@ -163,7 +176,7 @@ func main() {
 	signal.Notify(sig, os.Interrupt)
 	go func() {
 		<-sig
-		fmt.Fprintf(os.Stderr, "\r\033[K")
+		_, _ = fmt.Fprintf(os.Stderr, "\r\033[K")
 		logResult("Interrupted, saving partial results...")
 		cancel()
 	}()

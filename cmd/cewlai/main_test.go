@@ -89,3 +89,25 @@ func TestMetaFlags(t *testing.T) {
 		t.Errorf("expected MetaFile '/tmp/meta.txt', got %q", cli.MetaFile)
 	}
 }
+
+func TestCountFlag(t *testing.T) {
+	cli := parseCLI(t, []string{"-u", "https://example.com", "--count"})
+	if !cli.Count {
+		t.Error("expected Count true")
+	}
+}
+
+func TestCompletionSubcommand(t *testing.T) {
+	var cli CLI
+	parser, err := kong.New(&cli, kong.Name("cewlai"), kong.Exit(func(int) {}))
+	if err != nil {
+		t.Fatalf("failed to create parser: %v", err)
+	}
+	kongCtx, err := parser.Parse([]string{"completion", "bash"})
+	if err != nil {
+		t.Fatalf("failed to parse completion command: %v", err)
+	}
+	if kongCtx.Command() != "completion <shell>" {
+		t.Errorf("expected command 'completion <shell>', got %q", kongCtx.Command())
+	}
+}
