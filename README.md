@@ -201,10 +201,12 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 
 ## How AI Enrichment Works
 
-1. The crawler extracts visible text from the target site
-2. A context summary (default 4000 chars, configurable with `--ai-context`) is sent to the LLM
-3. The LLM generates contextually related words that are NOT on the site: industry terms, likely passwords, role names, product names, date patterns, location words, common mutations
-4. Both crawled and AI-generated words are merged, deduplicated, and sorted
+1. The crawler visits pages and collects text per page from all sources (HTML, JS, XML, JSON, CSS, metadata, subtitles)
+2. A context summary is built by sampling text evenly across all crawled pages (randomized order, default 4000 chars, configurable with `--ai-context`). This ensures the LLM sees the full breadth of the site, not just the first few pages
+3. The context is sent to the LLM with a specialized prompt (comma-separated output to save tokens). The tool retries until the exact requested word count is reached (`--ai-words`), deduplicating across attempts
+4. The LLM generates contextually related words that are NOT on the site: industry terms, likely passwords, role names, product names, date patterns, location words
+5. Crawled results are cached locally (default 60min TTL, `--no-cache` to bypass). Running different AI modes on the same target reuses the cached crawl instantly
+6. Both crawled and AI-generated words are merged, deduplicated, and sorted
 
 ## Features vs CeWL
 
