@@ -54,6 +54,10 @@ func logSuccess(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, colorize(green, "[+] ")+format+"\n", args...)
 }
 
+func logResult(format string, args ...any) {
+	fmt.Fprintf(os.Stderr, colorize(green, "[+] ")+format+"\n", args...)
+}
+
 func logError(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, colorize(red, "[-] ")+format+"\n", args...)
 }

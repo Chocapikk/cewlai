@@ -142,7 +142,7 @@ func main() {
 		logFatal("Crawl failed: %v", err)
 	}
 
-	logSuccess("Crawled %d pages, extracted %d raw words", result.Pages, len(result.Words))
+	logResult("Crawled %d pages, extracted %d raw words", result.Pages, len(result.Words))
 
 	crawlWords := words.FilterWords(result.Words, cli.MinWordLength, cli.MaxWordLength, cli.WithNumbers)
 	if cli.Lowercase {
@@ -167,11 +167,11 @@ func main() {
 		}
 		logInfo("Generating mutations...")
 		merged = words.MutateWords(merged, cfg)
-		logSuccess("Mutated to %d words", len(merged))
+		logResult("Mutated to %d words", len(merged))
 	}
 
 	final := words.DeduplicateWords(merged)
-	logSuccess("Final wordlist: %d unique words", len(final))
+	logResult("Final wordlist: %d unique words", len(final))
 
 	writeWordlist(final, cli.Output, cli.Count, cli.Groups)
 	writeExtras(result, cli)
@@ -243,7 +243,7 @@ func enrichWithAI(cli CLI, result *crawler.CrawlResult) []string {
 		aiWords = aiWords[:target]
 	}
 
-	logSuccess("AI generated %d words", len(aiWords))
+	logResult("AI generated %d words", len(aiWords))
 	return aiWords
 }
 
