@@ -7,14 +7,16 @@ import (
 	"github.com/Chocapikk/cewlai/words"
 )
 
-func extractFromJS(body []byte, wordSet map[string]struct{}) {
+func extractFromJS(body []byte, wordSet map[string]struct{}) []string {
 	analyzer := jsluice.NewAnalyzer(body)
 	analyzer.AddSecretMatchers(jsluice.AllSecretMatchers())
 
+	var urls []string
 	for _, url := range analyzer.GetURLs() {
 		for _, w := range words.NormalizeAndSplit(url.URL) {
 			wordSet[w] = struct{}{}
 		}
+		urls = append(urls, url.URL)
 	}
 
 	for _, secret := range analyzer.GetSecrets() {
@@ -22,4 +24,6 @@ func extractFromJS(body []byte, wordSet map[string]struct{}) {
 			wordSet[w] = struct{}{}
 		}
 	}
+
+	return urls
 }

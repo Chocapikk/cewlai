@@ -228,7 +228,9 @@ func matchType(contentType, reqURL string, types []string, exts []string) bool {
 }
 
 var parsers = []contentParser{
-	{[]string{"javascript", "ecmascript"}, []string{".js", ".mjs"}, extractFromJS},
+	{[]string{"javascript", "ecmascript"}, []string{".js", ".mjs"}, func(body []byte, wordSet map[string]struct{}) {
+		extractFromJS(body, wordSet)
+	}},
 	{[]string{"xml", "svg"}, []string{".xml", ".svg", ".rss", ".atom", ".sitemap"}, extractFromXML},
 	{[]string{"json"}, []string{".json", ".webmanifest"}, extractFromJSON},
 	{[]string{"css"}, []string{".css"}, extractFromCSS},
@@ -273,8 +275,11 @@ func (s *crawlState) processHTML(r *colly.Response) {
 	doc.Find("script").Each(func(_ int, sel *goquery.Selection) {
 		if js := sel.Text(); js != "" {
 			s.mu.Lock()
-			extractFromJS([]byte(js), s.wordSet)
+			urls := extractFromJS([]byte(js), s.wordSet)
 			s.mu.Unlock()
+			for _, u := range urls {
+				_ = r.Request.Visit(r.Request.AbsoluteURL(u))
+			}
 		}
 	})
 
@@ -406,6 +411,9 @@ func (s *crawlState) processMeta(body []byte, reqURL string) {
 func (s *crawlState) onError(r *colly.Response, err error) {
 	if s.opts.Verbose {
 		log.Printf("Error crawling %s: %v", r.Request.URL, err)
+	}
+	if len(r.Body) > 0 {
+		s.onResponse(r)
 	}
 }
 
