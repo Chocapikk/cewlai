@@ -47,7 +47,8 @@ type CLI struct {
 	BaseURL  string `help:"Custom API base URL for OpenAI-compatible endpoints" name:"base-url"`
 	Mode     string `default:"default" help:"AI prompt mode: default, passwords, dirs, subdomains, geo"`
 	Prompt   string `help:"Custom AI system prompt (overrides --mode)"`
-	AIWords  int    `default:"200" help:"Number of AI-generated words" name:"ai-words"`
+	AIWords   int `default:"200" help:"Number of AI-generated words" name:"ai-words"`
+	AIContext int `default:"4000" help:"Max characters of context sent to LLM" name:"ai-context"`
 
 	// Extraction
 	Email     bool   `short:"e" help:"Extract email addresses"`
@@ -124,6 +125,7 @@ func main() {
 		CaptureSubdomains: cli.CaptureSubdomains,
 		CaptureDomain:     cli.CaptureDomain,
 		MaxPages:          cli.MaxPages,
+		MaxContext:        cli.AIContext,
 		Threads:           cli.Threads,
 		ProxyURL:          cli.Proxy,
 		AuthType:          cli.AuthType,

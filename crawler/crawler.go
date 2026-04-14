@@ -30,6 +30,7 @@ type CrawlOptions struct {
 	CaptureDomain     bool
 	MaxPages          int
 	Threads           int
+	MaxContext        int
 	ProxyURL          string
 	AuthType          string
 	AuthUser          string
@@ -69,9 +70,16 @@ func (s *crawlState) addWords(text string) {
 }
 
 func (s *crawlState) addContext(text string) {
-	if s.contextBuf.Len() < 4000 {
+	if s.contextBuf.Len() < s.contextLimit() {
 		s.contextBuf.WriteString(text + " ")
 	}
+}
+
+func (s *crawlState) contextLimit() int {
+	if s.opts.MaxContext > 0 {
+		return s.opts.MaxContext
+	}
+	return 4000
 }
 
 func (s *crawlState) addEmail(email string) {
@@ -109,8 +117,9 @@ func Crawl(opts CrawlOptions) (*CrawlResult, error) {
 	c.Wait()
 
 	ctx := s.contextBuf.String()
-	if len(ctx) > 4000 {
-		ctx = ctx[:4000]
+	limit := s.contextLimit()
+	if len(ctx) > limit {
+		ctx = ctx[:limit]
 	}
 
 	return &CrawlResult{
