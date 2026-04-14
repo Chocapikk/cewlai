@@ -44,19 +44,19 @@ export GROQ_API_KEY=gsk_...
 cewlai -u https://example.com --ai -p groq
 ```
 
-Don't know which models are available? List them:
+> [!TIP]
+> Don't know which models are available? List them:
+> ```bash
+> cewlai --list-models -p groq
+> cewlai --list-models -p cerebras
+> ```
 
-```bash
-cewlai --list-models -p groq
-cewlai --list-models -p cerebras
-```
-
-No API key? The tool tells you what to set:
-
-```
-$ cewlai -u https://example.com --ai -p groq
-[-] AI provider error: no API key for groq. Set GROQ_API_KEY or use --api-key
-```
+> [!WARNING]
+> No API key? The tool tells you what to set:
+> ```
+> $ cewlai -u https://example.com --ai -p groq
+> [-] AI provider error: no API key for groq. Set GROQ_API_KEY or use --api-key
+> ```
 
 Full example:
 
@@ -127,27 +127,26 @@ Flags:
 
 ## Security and Privacy
 
-**If you are on a real pentest engagement, read this.**
+> [!CAUTION]
+> Cloud AI providers (Groq, OpenRouter, Cerebras, HuggingFace, Anthropic, OpenAI) receive the crawled context from your target site when you use `--ai`. This includes text content, page titles, metadata, and any other data extracted during the crawl.
+>
+> You have no control over what these providers log, store, retain, or use for model training. Sending client data to a third-party API without authorization may violate your rules of engagement, NDA, or data protection regulations (GDPR, HIPAA, etc.).
 
-Cloud AI providers (Groq, OpenRouter, Cerebras, HuggingFace, Anthropic, OpenAI) receive the crawled context from your target site when you use `--ai`. This includes text content, page titles, metadata, and any other data extracted during the crawl.
-
-You have no control over what these providers log, store, retain, or use for model training. Sending client data to a third-party API without authorization may violate your rules of engagement, NDA, or data protection regulations (GDPR, HIPAA, etc.).
-
-**For sensitive engagements, use a local model:**
-
-```bash
-ollama pull llama3
-cewlai -u https://example.com --ai -p openai -m llama3 \
-  --base-url http://localhost:11434/v1 --api-key dummy
-```
-
-This keeps all data on your machine. No external API calls. No data leaves your network.
+> [!TIP]
+> For sensitive engagements, use a local model to keep all data on your machine:
+> ```bash
+> ollama pull llama3
+> cewlai -u https://example.com --ai -p openai -m llama3 \
+>   --base-url http://localhost:11434/v1 --api-key dummy
+> ```
+> No external API calls. No data leaves your network.
 
 ---
 
 ## AI Providers
 
-> **Tested with Groq and Cerebras.** Other providers are supported but not yet fully tested. If you run into issues, please open an issue.
+> [!NOTE]
+> Tested with Groq and Cerebras. Other providers are supported but not yet fully tested. If you run into issues, please open an issue.
 
 ### Paid
 
