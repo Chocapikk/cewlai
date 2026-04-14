@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"net/url"
@@ -10,7 +10,7 @@ func TestCaptureURLComponents_Paths(t *testing.T) {
 	baseURL, _ := url.Parse("https://example.com")
 	wordSet := make(map[string]struct{})
 
-	captureURLComponents(reqURL, baseURL, wordSet, CrawlOptions{CapturePaths: true})
+	CaptureURLComponents(reqURL, baseURL, wordSet, true, false, false)
 
 	for _, expected := range []string{"about", "team"} {
 		if _, ok := wordSet[expected]; !ok {
@@ -28,7 +28,7 @@ func TestCaptureURLComponents_Domain(t *testing.T) {
 	baseURL, _ := url.Parse("https://example.com")
 	wordSet := make(map[string]struct{})
 
-	captureURLComponents(reqURL, baseURL, wordSet, CrawlOptions{CaptureDomain: true})
+	CaptureURLComponents(reqURL, baseURL, wordSet, false, false, true)
 
 	if _, ok := wordSet["example"]; !ok {
 		t.Errorf("expected domain 'example', got %v", wordSet)
@@ -40,7 +40,7 @@ func TestCaptureURLComponents_Subdomains(t *testing.T) {
 	baseURL, _ := url.Parse("https://example.com")
 	wordSet := make(map[string]struct{})
 
-	captureURLComponents(reqURL, baseURL, wordSet, CrawlOptions{CaptureSubdomains: true})
+	CaptureURLComponents(reqURL, baseURL, wordSet, false, true, false)
 
 	for _, expected := range []string{"blog", "shop"} {
 		if _, ok := wordSet[expected]; !ok {

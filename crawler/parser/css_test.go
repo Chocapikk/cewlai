@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import "testing"
 
@@ -11,7 +11,7 @@ func TestExtractFromCSS_Selectors(t *testing.T) {
 	`)
 
 	wordSet := make(map[string]struct{})
-	extractFromCSS(css, wordSet)
+	ExtractFromCSS(css, wordSet)
 
 	expected := []string{"admin-panel", "login-form", "user-profile", "btn-primary"}
 	for _, w := range expected {
@@ -31,7 +31,7 @@ func TestExtractFromCSS_Variables(t *testing.T) {
 	`)
 
 	wordSet := make(map[string]struct{})
-	extractFromCSS(css, wordSet)
+	ExtractFromCSS(css, wordSet)
 
 	expected := []string{"brand-color", "company-blue", "font-primary"}
 	for _, w := range expected {
@@ -48,7 +48,7 @@ func TestExtractFromCSS_URLs(t *testing.T) {
 	`)
 
 	wordSet := make(map[string]struct{})
-	extractFromCSS(css, wordSet)
+	ExtractFromCSS(css, wordSet)
 
 	if _, ok := wordSet["company-logo"]; !ok {
 		t.Error("expected 'company-logo' from URL path")
@@ -63,7 +63,7 @@ func TestExtractFromCSS_Comments(t *testing.T) {
 	`)
 
 	wordSet := make(map[string]struct{})
-	extractFromCSS(css, wordSet)
+	ExtractFromCSS(css, wordSet)
 
 	expected := []string{"Admin", "dashboard", "internal", "portal"}
 	for _, w := range expected {
@@ -75,7 +75,7 @@ func TestExtractFromCSS_Comments(t *testing.T) {
 
 func TestExtractFromCSS_Empty(t *testing.T) {
 	wordSet := make(map[string]struct{})
-	extractFromCSS([]byte(""), wordSet)
+	ExtractFromCSS([]byte(""), wordSet)
 	if len(wordSet) != 0 {
 		t.Errorf("expected empty wordSet, got %d", len(wordSet))
 	}
@@ -91,6 +91,6 @@ func BenchmarkExtractFromCSS(b *testing.B) {
 
 	for b.Loop() {
 		wordSet := make(map[string]struct{})
-		extractFromCSS(css, wordSet)
+		ExtractFromCSS(css, wordSet)
 	}
 }

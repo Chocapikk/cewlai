@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ var (
 	vttTagRe       = regexp.MustCompile(`<[^>]+>`)
 )
 
-func extractMediaMetadata(body []byte, wordSet map[string]struct{}) {
+func ExtractMediaMetadata(body []byte, wordSet map[string]struct{}) {
 	m, err := tag.ReadFrom(bytes.NewReader(body))
 	if err != nil {
 		return
@@ -32,7 +32,7 @@ func extractMediaMetadata(body []byte, wordSet map[string]struct{}) {
 	}
 }
 
-func extractSubtitles(body []byte, wordSet map[string]struct{}) {
+func ExtractSubtitles(body []byte, wordSet map[string]struct{}) {
 	for _, line := range strings.Split(string(body), "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" || line == "WEBVTT" {

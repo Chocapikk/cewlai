@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import "testing"
 
@@ -16,7 +16,7 @@ Our team uses <b>Metasploit</b> and <i>Burp Suite</i>
 `)
 
 	wordSet := make(map[string]struct{})
-	extractSubtitles(vtt, wordSet)
+	ExtractSubtitles(vtt, wordSet)
 
 	expected := []string{"Welcome", "security", "presentation", "vulnerability", "management", "Metasploit", "Burp", "Suite"}
 	for _, w := range expected {
@@ -48,7 +48,7 @@ Privilege escalation on Linux
 `)
 
 	wordSet := make(map[string]struct{})
-	extractSubtitles(srt, wordSet)
+	ExtractSubtitles(srt, wordSet)
 
 	expected := []string{"Penetration", "testing", "fundamentals", "Authentication", "bypass", "techniques", "Privilege", "escalation", "Linux"}
 	for _, w := range expected {
@@ -60,7 +60,7 @@ Privilege escalation on Linux
 
 func TestExtractSubtitles_Empty(t *testing.T) {
 	wordSet := make(map[string]struct{})
-	extractSubtitles([]byte(""), wordSet)
+	ExtractSubtitles([]byte(""), wordSet)
 	if len(wordSet) != 0 {
 		t.Errorf("expected empty wordSet, got %d", len(wordSet))
 	}
@@ -78,6 +78,6 @@ She wants her intensity to be chosen
 
 	for b.Loop() {
 		wordSet := make(map[string]struct{})
-		extractSubtitles(vtt, wordSet)
+		ExtractSubtitles(vtt, wordSet)
 	}
 }

@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"archive/zip"
@@ -17,7 +17,7 @@ func TestExtractPDFMetadata(t *testing.T) {
 	var mu sync.Mutex
 	metaSet := make(map[string]struct{})
 
-	extractPDFMetadata(pdf, &mu, metaSet, false, "test.pdf")
+	ExtractPDFMetadata(pdf, &mu, metaSet, false, "test.pdf")
 
 	expected := []string{"John Doe", "Microsoft Word", "Jane Smith", "Bob Wilson"}
 	for _, name := range expected {
@@ -43,7 +43,7 @@ func TestExtractOfficeMetadata(t *testing.T) {
 	var mu sync.Mutex
 	metaSet := make(map[string]struct{})
 
-	extractOfficeMetadata(buf.Bytes(), &mu, metaSet, false, "test.docx")
+	ExtractOfficeMetadata(buf.Bytes(), &mu, metaSet, false, "test.docx")
 
 	if _, ok := metaSet["Alice Author"]; !ok {
 		t.Errorf("expected 'Alice Author' in metadata, got %v", metaSet)
@@ -59,9 +59,9 @@ func TestExtractPDFMetadata_NoAlloc(t *testing.T) {
 	metaSet := make(map[string]struct{})
 
 	avg := testing.AllocsPerRun(100, func() {
-		extractPDFMetadata(pdf, &mu, metaSet, false, "test.pdf")
+		ExtractPDFMetadata(pdf, &mu, metaSet, false, "test.pdf")
 	})
 	if avg > 10 {
-		t.Errorf("extractPDFMetadata: %.1f allocs, want <= 10", avg)
+		t.Errorf("ExtractPDFMetadata: %.1f allocs, want <= 10", avg)
 	}
 }

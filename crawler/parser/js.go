@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/Chocapikk/cewlai/words"
 )
 
-func extractFromJS(body []byte, wordSet map[string]struct{}) []string {
+func ExtractFromJS(body []byte, wordSet map[string]struct{}) []string {
 	analyzer := jsluice.NewAnalyzer(body)
 	analyzer.AddSecretMatchers(jsluice.AllSecretMatchers())
 

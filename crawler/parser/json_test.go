@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import "testing"
 
@@ -14,7 +14,7 @@ func TestExtractFromJSON_Object(t *testing.T) {
 	}`)
 
 	wordSet := make(map[string]struct{})
-	extractFromJSON(data, wordSet)
+	ExtractFromJSON(data, wordSet)
 
 	expected := []string{"Chocapikk", "Security", "Researcher", "metasploit", "burpsuite", "nmap", "VulnCheck", "Paris", "name", "role", "tools", "company", "location"}
 	for _, w := range expected {
@@ -28,7 +28,7 @@ func TestExtractFromJSON_Array(t *testing.T) {
 	data := []byte(`[{"title": "Exploit Development"}, {"title": "Reverse Engineering"}]`)
 
 	wordSet := make(map[string]struct{})
-	extractFromJSON(data, wordSet)
+	ExtractFromJSON(data, wordSet)
 
 	expected := []string{"Exploit", "Development", "Reverse", "Engineering", "title"}
 	for _, w := range expected {
@@ -48,7 +48,7 @@ func TestExtractFromJSON_WordPress(t *testing.T) {
 	}`)
 
 	wordSet := make(map[string]struct{})
-	extractFromJSON(data, wordSet)
+	ExtractFromJSON(data, wordSet)
 
 	expected := []string{"Acme", "Corp", "Enterprise", "healthcare", "authentication", "cookie"}
 	for _, w := range expected {
@@ -60,7 +60,7 @@ func TestExtractFromJSON_WordPress(t *testing.T) {
 
 func TestExtractFromJSON_Empty(t *testing.T) {
 	wordSet := make(map[string]struct{})
-	extractFromJSON([]byte(""), wordSet)
+	ExtractFromJSON([]byte(""), wordSet)
 	if len(wordSet) != 0 {
 		t.Errorf("expected empty wordSet, got %d", len(wordSet))
 	}
@@ -68,7 +68,7 @@ func TestExtractFromJSON_Empty(t *testing.T) {
 
 func TestExtractFromJSON_Invalid(t *testing.T) {
 	wordSet := make(map[string]struct{})
-	extractFromJSON([]byte("not json {broken"), wordSet)
+	ExtractFromJSON([]byte("not json {broken"), wordSet)
 	if len(wordSet) != 0 {
 		t.Errorf("expected empty wordSet, got %d", len(wordSet))
 	}
@@ -83,6 +83,6 @@ func BenchmarkExtractFromJSON(b *testing.B) {
 
 	for b.Loop() {
 		wordSet := make(map[string]struct{})
-		extractFromJSON(data, wordSet)
+		ExtractFromJSON(data, wordSet)
 	}
 }

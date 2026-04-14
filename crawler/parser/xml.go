@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"encoding/xml"
@@ -7,7 +7,7 @@ import (
 	"github.com/Chocapikk/cewlai/words"
 )
 
-func extractFromXML(body []byte, wordSet map[string]struct{}) {
+func ExtractFromXML(body []byte, wordSet map[string]struct{}) {
 	decoder := xml.NewDecoder(strings.NewReader(string(body)))
 	decoder.Strict = false
 

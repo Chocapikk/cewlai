@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"github.com/Chocapikk/cewlai/words"
 )
 
-func extractFromJSON(body []byte, wordSet map[string]struct{}) {
+func ExtractFromJSON(body []byte, wordSet map[string]struct{}) {
 	var raw any
 	if err := json.Unmarshal(body, &raw); err != nil {
 		return

@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"regexp"
@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	emailRe = regexp.MustCompile(`(?i)[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}`)
+	EmailRe = regexp.MustCompile(`(?i)[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}`)
 
 	obfuscatedRe = regexp.MustCompile(`(?i)[a-z0-9._%+\-]+\s*[\[\(<{]?\s*(?:at|@)\s*[\]\)>}]?\s*[a-z0-9.\-]+\s*[\[\(<{]?\s*(?:dot|\.)\s*[\]\)>}]?\s*[a-z]{2,4}`)
 
@@ -14,7 +14,7 @@ var (
 	dotReplacer = regexp.MustCompile(`(?i)\s*[\[\(<{]?\s*\bdot\b\s*[\]\)>}]?\s*`)
 )
 
-func extractEmailsFromText(text string) []string {
+func ExtractEmailsFromText(text string) []string {
 	seen := make(map[string]struct{})
 	var out []string
 
@@ -26,12 +26,12 @@ func extractEmailsFromText(text string) []string {
 		out = append(out, email)
 	}
 
-	for _, m := range emailRe.FindAllString(text, -1) {
+	for _, m := range EmailRe.FindAllString(text, -1) {
 		collect(strings.ToLower(m))
 	}
 
 	for _, m := range obfuscatedRe.FindAllString(text, -1) {
-		if email := deobfuscateEmail(m); email != "" {
+		if email := DeobfuscateEmail(m); email != "" {
 			collect(email)
 		}
 	}
@@ -39,11 +39,11 @@ func extractEmailsFromText(text string) []string {
 	return out
 }
 
-func deobfuscateEmail(raw string) string {
+func DeobfuscateEmail(raw string) string {
 	result := atReplacer.ReplaceAllString(raw, "@")
 	result = dotReplacer.ReplaceAllString(result, ".")
 	result = strings.ToLower(strings.TrimSpace(result))
-	if emailRe.MatchString(result) {
+	if EmailRe.MatchString(result) {
 		return result
 	}
 	return ""

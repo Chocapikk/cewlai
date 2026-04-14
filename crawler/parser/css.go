@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"regexp"
@@ -14,7 +14,7 @@ var (
 	cssCommentRe  = regexp.MustCompile(`/\*([^*]|\*[^/])*\*/`)
 )
 
-func extractFromCSS(body []byte, wordSet map[string]struct{}) {
+func ExtractFromCSS(body []byte, wordSet map[string]struct{}) {
 	content := string(body)
 
 	for _, comment := range cssCommentRe.FindAllString(content, -1) {

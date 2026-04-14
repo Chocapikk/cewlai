@@ -1,17 +1,41 @@
 package crawler
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/Chocapikk/cewlai/crawler/parser"
 	"github.com/Chocapikk/cewlai/words"
 	"github.com/jlaffaye/ftp"
 )
+
+type ftpSource struct {
+	parsed *url.URL
+}
+
+func (f *ftpSource) Crawl(ctx context.Context, opts CrawlOptions) (*CrawlResult, error) {
+	addr := f.parsed.Host
+	user := ""
+	pass := ""
+	if f.parsed.User != nil {
+		user = f.parsed.User.Username()
+		pass, _ = f.parsed.User.Password()
+	}
+	if opts.AuthUser != "" {
+		user = opts.AuthUser
+	}
+	if opts.AuthPass != "" {
+		pass = opts.AuthPass
+	}
+	return crawlFTP(addr, user, pass, opts)
+}
 
 type ftpFile struct {
 	path string
@@ -100,7 +124,7 @@ func crawlFTP(addr, user, pass string, opts CrawlOptions) (*CrawlResult, error) 
 
 				ext := strings.ToLower(filepath.Ext(f.name))
 				mu.Lock()
-				parseByExtension(ext, body, wordSet, &pageContexts)
+				parser.ParseByExtension(ext, body, wordSet, &pageContexts)
 				filesProcessed++
 				mu.Unlock()
 				fmt.Fprintf(os.Stderr, "\r[*] FTP: %d/%d files processed", filesProcessed, len(files))

@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import "testing"
 
@@ -19,7 +19,7 @@ func TestExtractFromXML_RSS(t *testing.T) {
 </rss>`)
 
 	wordSet := make(map[string]struct{})
-	extractFromXML(rss, wordSet)
+	ExtractFromXML(rss, wordSet)
 
 	expected := []string{"Chocapikk", "Security", "Blog", "Vulnerability", "CeWL", "Dead", "Pentest", "Valentin", "Lobstein"}
 	for _, w := range expected {
@@ -42,7 +42,7 @@ func TestExtractFromXML_Sitemap(t *testing.T) {
 </urlset>`)
 
 	wordSet := make(map[string]struct{})
-	extractFromXML(sitemap, wordSet)
+	ExtractFromXML(sitemap, wordSet)
 
 	if _, ok := wordSet["chocapikk"]; !ok {
 		if _, ok2 := wordSet["cewlai"]; !ok2 {
@@ -64,7 +64,7 @@ func TestExtractFromXML_Atom(t *testing.T) {
 </feed>`)
 
 	wordSet := make(map[string]struct{})
-	extractFromXML(atom, wordSet)
+	ExtractFromXML(atom, wordSet)
 
 	expected := []string{"Security", "Research", "Exploit", "Development", "Chocapikk"}
 	for _, w := range expected {
@@ -84,7 +84,7 @@ func TestExtractFromXML_SVG(t *testing.T) {
 </svg>`)
 
 	wordSet := make(map[string]struct{})
-	extractFromXML(svg, wordSet)
+	ExtractFromXML(svg, wordSet)
 
 	expected := []string{"Company", "Logo", "Acme", "Corporation", "security", "division", "Admin", "Portal", "Confidential"}
 	for _, w := range expected {
@@ -96,7 +96,7 @@ func TestExtractFromXML_SVG(t *testing.T) {
 
 func TestExtractFromXML_Empty(t *testing.T) {
 	wordSet := make(map[string]struct{})
-	extractFromXML([]byte(""), wordSet)
+	ExtractFromXML([]byte(""), wordSet)
 	if len(wordSet) != 0 {
 		t.Errorf("expected empty wordSet, got %d entries", len(wordSet))
 	}
@@ -104,7 +104,7 @@ func TestExtractFromXML_Empty(t *testing.T) {
 
 func TestExtractFromXML_Invalid(t *testing.T) {
 	wordSet := make(map[string]struct{})
-	extractFromXML([]byte("not xml at all <broken"), wordSet)
+	ExtractFromXML([]byte("not xml at all <broken"), wordSet)
 	// Should not panic
 }
 
@@ -123,6 +123,6 @@ func BenchmarkExtractFromXML(b *testing.B) {
 
 	for b.Loop() {
 		wordSet := make(map[string]struct{})
-		extractFromXML(rss, wordSet)
+		ExtractFromXML(rss, wordSet)
 	}
 }

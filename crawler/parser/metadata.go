@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"archive/zip"
@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	documentExts = regexp.MustCompile(`(?i)\.(docx|xlsx|pptx|dotx|potx|ppsx)$`)
-	pdfExt       = regexp.MustCompile(`(?i)\.pdf$`)
+	DocumentExts = regexp.MustCompile(`(?i)\.(docx|xlsx|pptx|dotx|potx|ppsx)$`)
+	PdfExt       = regexp.MustCompile(`(?i)\.pdf$`)
 
 	pdfPatterns = []*regexp.Regexp{
 		regexp.MustCompile(`/Author\s*\(([^)]+)\)`),
@@ -27,7 +27,7 @@ var (
 	}
 )
 
-func extractPDFMetadata(body []byte, mu *sync.Mutex, metaSet map[string]struct{}, verbose bool, reqURL string) {
+func ExtractPDFMetadata(body []byte, mu *sync.Mutex, metaSet map[string]struct{}, verbose bool, reqURL string) {
 	names := matchAll(string(body), pdfPatterns)
 
 	mu.Lock()
@@ -35,7 +35,7 @@ func extractPDFMetadata(body []byte, mu *sync.Mutex, metaSet map[string]struct{}
 	addMetadata(metaSet, names, verbose, "PDF", reqURL)
 }
 
-func extractOfficeMetadata(body []byte, mu *sync.Mutex, metaSet map[string]struct{}, verbose bool, reqURL string) {
+func ExtractOfficeMetadata(body []byte, mu *sync.Mutex, metaSet map[string]struct{}, verbose bool, reqURL string) {
 	content, err := readZipEntry(body, "docProps/core.xml")
 	if err != nil {
 		if verbose {

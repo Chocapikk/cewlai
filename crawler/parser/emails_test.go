@@ -1,4 +1,4 @@
-package crawler
+package parser
 
 import (
 	"testing"
@@ -25,9 +25,9 @@ func TestExtractEmailsFromText(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := extractEmailsFromText(tt.input)
+			got := ExtractEmailsFromText(tt.input)
 			if !sliceEqual(got, tt.want) {
-				t.Errorf("extractEmailsFromText(%q) = %v, want %v", tt.input, got, tt.want)
+				t.Errorf("ExtractEmailsFromText(%q) = %v, want %v", tt.input, got, tt.want)
 			}
 		})
 	}
@@ -36,10 +36,10 @@ func TestExtractEmailsFromText(t *testing.T) {
 func TestExtractEmailsFromText_NoAlloc(t *testing.T) {
 	input := "reach us at info@company.com or support@company.com"
 	avg := testing.AllocsPerRun(100, func() {
-		_ = extractEmailsFromText(input)
+		_ = ExtractEmailsFromText(input)
 	})
 	if avg > 25 {
-		t.Errorf("extractEmailsFromText: %.1f allocs, want <= 25", avg)
+		t.Errorf("ExtractEmailsFromText: %.1f allocs, want <= 25", avg)
 	}
 }
 
