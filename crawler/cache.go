@@ -34,6 +34,7 @@ func loadCache(url string, depth int, ttl time.Duration) (*CrawlResult, bool) {
 	}
 
 	if time.Since(cached.Timestamp) > ttl {
+		_ = os.Remove(path)
 		return nil, false
 	}
 
