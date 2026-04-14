@@ -125,11 +125,29 @@ Flags:
       --capture-domain             Add domain to wordlist
 ```
 
+## Security and Privacy
+
+**If you are on a real pentest engagement, read this.**
+
+Cloud AI providers (Groq, OpenRouter, Cerebras, HuggingFace, Anthropic, OpenAI) receive the crawled context from your target site when you use `--ai`. This includes text content, page titles, metadata, and any other data extracted during the crawl.
+
+You have no control over what these providers log, store, retain, or use for model training. Sending client data to a third-party API without authorization may violate your rules of engagement, NDA, or data protection regulations (GDPR, HIPAA, etc.).
+
+**For sensitive engagements, use a local model:**
+
+```bash
+ollama pull llama3
+cewlai -u https://example.com --ai -p openai -m llama3 \
+  --base-url http://localhost:11434/v1 --api-key dummy
+```
+
+This keeps all data on your machine. No external API calls. No data leaves your network.
+
+---
+
 ## AI Providers
 
 > **Tested with Groq and Cerebras.** Other providers are supported but not yet fully tested. If you run into issues, please open an issue.
-
-> **Privacy warning:** When using cloud AI providers, crawled context from the target site is sent to their API. During a real engagement, consider using a local model (`--base-url`) to keep all data on your machine. You don't control what third-party providers log, store, or train on.
 
 ### Paid
 
