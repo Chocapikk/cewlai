@@ -231,6 +231,14 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 | Audio/Video metadata       | No               | Yes (ID3, MP4, OGG - title, artist, album)  |
 | Subtitle extraction        | No               | Yes (VTT + SRT transcript text)             |
 | Word mutations (CUPP-like) | No               | Yes (leet, reverse, suffixes, custom JSON)  |
+| AI word count control      | No               | Yes (`--ai-words` with retry loop)          |
+| AI context control         | No               | Yes (`--ai-context` configurable)           |
+| Token optimization         | No               | Yes (comma-separated output)                |
+| Model listing              | No               | Yes (`--list-models` queries provider API)  |
+| API key validation         | No               | Yes (tells you which env var to set)        |
+| Tor/SOCKS5 proxy           | No               | Yes (`--proxy socks5://...`)                |
+| Concurrent crawling        | No (sequential)  | Yes (`-t` configurable threads)             |
+| Resource following         | `<a>` only       | `<a>`, `<script>`, `<link>`, `<img>`, `<iframe>`, `<track>` |
 
 ## Library Usage
 
