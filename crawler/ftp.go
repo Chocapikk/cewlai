@@ -33,7 +33,11 @@ func (f *ftpSource) Crawl(ctx context.Context, opts CrawlOptions) (*CrawlResult,
 	if opts.AuthPass != "" {
 		pass = opts.AuthPass
 	}
-	return crawlFTP(addr, user, pass, opts)
+	startPath := f.parsed.Path
+	if startPath == "" {
+		startPath = "/"
+	}
+	return crawlFTP(addr, user, pass, startPath, opts)
 }
 
 type ftpFile struct {
@@ -41,7 +45,7 @@ type ftpFile struct {
 	name string
 }
 
-func crawlFTP(addr, user, pass string, opts CrawlOptions) (*CrawlResult, error) {
+func crawlFTP(addr, user, pass, startPath string, opts CrawlOptions) (*CrawlResult, error) {
 	if user == "" {
 		user = "anonymous"
 	}
@@ -57,7 +61,7 @@ func crawlFTP(addr, user, pass string, opts CrawlOptions) (*CrawlResult, error) 
 		return nil, err
 	}
 
-	files, wordSet := ftpListAll(conn)
+	files, wordSet := ftpListAll(conn, startPath)
 	_ = conn.Quit()
 
 	var mu sync.Mutex
@@ -96,10 +100,10 @@ func ftpConnect(addr, user, pass string) (*ftp.ServerConn, error) {
 	return conn, nil
 }
 
-func ftpListAll(conn *ftp.ServerConn) ([]ftpFile, map[string]struct{}) {
+func ftpListAll(conn *ftp.ServerConn, startPath string) ([]ftpFile, map[string]struct{}) {
 	wordSet := make(map[string]struct{})
 	var files []ftpFile
-	dirs := []string{"/"}
+	dirs := []string{startPath}
 
 	for len(dirs) > 0 {
 		dir := dirs[0]
