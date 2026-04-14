@@ -37,6 +37,20 @@ With AI enrichment:
 cewlai -u https://example.com --ai -p anthropic -m sonnet
 ```
 
+FTP crawling:
+
+```bash
+cewlai -u ftp://anonymous@ftp.example.com
+cewlai -u ftp://user:pass@ftp.example.com/share/docs
+```
+
+SMB crawling:
+
+```bash
+cewlai -u smb://user:pass@192.168.1.10/data
+cewlai -u smb://DOMAIN\\user:pass@host/share/path
+```
+
 With a free provider:
 
 ```bash
@@ -240,6 +254,8 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 | API key validation         | No               | Yes (tells you which env var to set)        |
 | Tor/SOCKS5 proxy           | No               | Yes (`--proxy socks5://...`)                |
 | Concurrent crawling        | No (sequential)  | Yes (`-t` configurable threads)             |
+| FTP crawling               | No               | Yes (anonymous + auth, parallel downloads)  |
+| SMB crawling               | No               | Yes (SMB2/3, NTLMv2 auth, URL credentials)  |
 | Resource following         | `<a>` only       | `<a>` for navigation + separate collector for `<script>`, `<link>`, `<img>`, `<iframe>`, `<track>` (no depth cost) |
 | Error page extraction      | No               | Yes (words from 404, 500, etc.)             |
 | JS URL discovery           | No               | Yes (jsluice URLs are visited)              |
@@ -262,7 +278,7 @@ import (
 )
 
 func main() {
-	// Crawl a target (HTTP, HTTPS, or FTP)
+	// Crawl a target (HTTP, HTTPS, FTP, or SMB)
 	ctx := context.Background()
 	result, _ := crawler.Crawl(ctx, crawler.CrawlOptions{
 		URL:           "https://example.com",
@@ -294,7 +310,7 @@ func main() {
 
 | Package          | Import                                        | Description                                                      |
 | ---------------- | --------------------------------------------- | ---------------------------------------------------------------- |
-| `crawler`        | `github.com/Chocapikk/cewlai/crawler`        | Web/FTP crawling, Source interface, cache, options                |
+| `crawler`        | `github.com/Chocapikk/cewlai/crawler`        | HTTP/FTP/SMB crawling, Source interface, cache, options           |
 | `crawler/parser` | `github.com/Chocapikk/cewlai/crawler/parser`  | Content parsers (HTML, JS, XML, JSON, CSS, PDF, Office, media)   |
 | `words`          | `github.com/Chocapikk/cewlai/words`           | Word splitting, filtering, dedup, counting, grouping, mutations  |
 | `ai`             | `github.com/Chocapikk/cewlai/ai`              | LLM providers, prompt modes, response parsing, model listing     |
