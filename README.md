@@ -127,7 +127,7 @@ Flags:
 
 ## AI Providers
 
-> **Tested with Groq.** Other providers are supported but not yet fully tested. If you run into issues, please open an issue.
+> **Tested with Groq and Cerebras.** Other providers are supported but not yet fully tested. If you run into issues, please open an issue.
 
 ### Paid
 

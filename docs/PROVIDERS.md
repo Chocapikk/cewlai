@@ -2,7 +2,9 @@
 
 CeWL AI supports multiple LLM providers out of the box. This document lists all supported providers, how to get an API key, and example usage.
 
-> **Tested with Groq.** Other providers are supported but not yet fully tested. If you run into issues, please open an issue.
+> **Tested with Groq and Cerebras.** Other providers are supported but not yet fully tested. If you run into issues, please open an issue.
+
+> **Tip:** Use `cewlai --list-models -p <provider>` to see available models for any provider.
 
 ## Anthropic
 
