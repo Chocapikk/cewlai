@@ -33,61 +33,62 @@ func getBanner() string {
 }
 
 type CLI struct {
-	URL       string `arg:"" optional:"" help:"Target URL to crawl"`
-	Url       string `short:"u" help:"Target URL to crawl" name:"url"`
-	Depth     int    `short:"d" default:"2" help:"Crawl depth"`
-	Output    string `short:"o" help:"Output file (default: stdout)"`
-	UserAgent string `default:"cewlai/1.0" help:"User agent for crawler" name:"user-agent"`
-	Verbose   bool   `short:"v" help:"Verbose output"`
-	Version   bool   `help:"Print version and exit"`
-	Update    bool   `help:"Self-update to latest release"`
-
-	// AI
-	AI        bool   `help:"Enable AI enrichment"`
-	Provider  string `short:"p" help:"AI provider: anthropic, openai, groq, openrouter, cerebras, huggingface"`
-	Model     string `short:"m" help:"Model name or shorthand"`
-	APIKey     string `help:"API key (or use env vars)" name:"api-key"`
-	BaseURL    string `help:"Custom API base URL for OpenAI-compatible endpoints" name:"base-url"`
-	ListModels bool   `help:"List available models for the selected provider" name:"list-models"`
-	Mode      string `default:"default" help:"AI prompt mode: default, passwords, dirs, subdomains, geo"`
-	Prompt    string `help:"Custom AI system prompt (overrides --mode)"`
-	AIWords   int    `default:"200" help:"Number of AI-generated words" name:"ai-words"`
-	AIContext int    `default:"4000" help:"Max characters of context sent to LLM" name:"ai-context"`
-
-	// Extraction
-	Email       bool   `short:"e" help:"Extract email addresses"`
-	EmailFile   string `help:"Write emails to file" name:"email-file"`
-	Meta        bool   `short:"a" help:"Extract document metadata"`
-	MetaFile    string `help:"Write metadata to file" name:"meta-file"`
-	Secrets     bool   `short:"s" help:"Extract secrets (API keys, tokens, passwords) via trufflehog detectors"`
-	SecretsFile string `help:"Write secrets to file" name:"secrets-file"`
-
-	// Word processing
-	MinWordLength int    `default:"3" help:"Minimum word length" name:"min-word-length"`
-	MaxWordLength int    `default:"0" help:"Maximum word length (0 = no limit)" name:"max-word-length"`
-	Lowercase     bool   `help:"Lowercase all words"`
-	WithNumbers   bool   `default:"true" help:"Include words with numbers" name:"with-numbers"`
-	Count         bool   `short:"c" help:"Show word frequency count"`
-	Groups        int    `short:"g" default:"0" help:"Generate word groups of N"`
-	Mutate        bool   `help:"Generate word mutations (leet, reverse, suffixes like CUPP)"`
-	MutateConfig  string `help:"Custom mutation config file (JSON)" name:"mutate-config"`
+	// Target
+	URL       string `arg:"" optional:"" help:"Target URL to crawl" group:"Target"`
+	Url       string `short:"u" help:"Target URL to crawl" name:"url" group:"Target"`
+	Depth     int    `short:"d" default:"2" help:"Crawl depth" group:"Target"`
+	Output    string `short:"o" help:"Output file (default: stdout)" group:"Target"`
+	Verbose   bool   `short:"v" help:"Verbose output" group:"Target"`
+	Version   bool   `help:"Print version and exit" group:"Target"`
+	Update    bool   `help:"Self-update to latest release" group:"Target"`
 
 	// Crawling
-	Offsite           bool     `help:"Follow offsite links"`
-	Proxy             string   `help:"HTTP proxy URL"`
-	AuthType          string   `help:"Auth type: basic" name:"auth-type"`
-	AuthUser          string   `help:"Auth username" name:"auth-user"`
-	AuthPass          string   `help:"Auth password" name:"auth-pass"`
-	Header            []string `help:"Custom header (repeatable, Key: Value)"`
-	Exclude           string   `help:"File with paths to exclude"`
-	MaxPages          int      `default:"0" help:"Maximum pages to crawl (0 = no limit)" name:"max-pages"`
-	Threads           int      `short:"t" default:"2" help:"Number of concurrent crawl threads"`
-	CapturePaths      bool     `help:"Add URL path components to wordlist" name:"capture-paths"`
-	CaptureSubdomains bool     `help:"Add subdomains to wordlist" name:"capture-subdomains"`
-	CaptureDomain     bool     `help:"Add domain to wordlist" name:"capture-domain"`
-	NoCache           bool     `help:"Disable crawl cache" name:"no-cache"`
-	CacheTTL          int      `default:"60" help:"Cache TTL in minutes" name:"cache-ttl"`
-	MaxFiles          int      `default:"0" help:"Maximum files to process for FTP/SFTP/SMB (0 = no limit)" name:"max-files"`
+	UserAgent         string   `default:"cewlai/1.0" help:"User agent for crawler" name:"user-agent" group:"Crawling"`
+	Offsite           bool     `help:"Follow offsite links" group:"Crawling"`
+	Proxy             string   `help:"HTTP proxy URL" group:"Crawling"`
+	AuthType          string   `help:"Auth type: basic" name:"auth-type" group:"Crawling"`
+	AuthUser          string   `help:"Auth username" name:"auth-user" group:"Crawling"`
+	AuthPass          string   `help:"Auth password" name:"auth-pass" group:"Crawling"`
+	Header            []string `help:"Custom header (repeatable, Key: Value)" group:"Crawling"`
+	Exclude           string   `help:"File with paths to exclude" group:"Crawling"`
+	MaxPages          int      `default:"0" help:"Maximum pages to crawl (0 = no limit)" name:"max-pages" group:"Crawling"`
+	MaxFiles          int      `default:"0" help:"Maximum files to process for FTP/SFTP/SMB (0 = no limit)" name:"max-files" group:"Crawling"`
+	Threads           int      `short:"t" default:"2" help:"Number of concurrent crawl threads" group:"Crawling"`
+	NoCache           bool     `help:"Disable crawl cache" name:"no-cache" group:"Crawling"`
+	CacheTTL          int      `default:"60" help:"Cache TTL in minutes" name:"cache-ttl" group:"Crawling"`
+
+	// Extraction
+	Email             bool     `short:"e" help:"Extract email addresses" group:"Extraction"`
+	EmailFile         string   `help:"Write emails to file" name:"email-file" group:"Extraction"`
+	Meta              bool     `short:"a" help:"Extract document metadata" group:"Extraction"`
+	MetaFile          string   `help:"Write metadata to file" name:"meta-file" group:"Extraction"`
+	Secrets           bool     `short:"s" help:"Extract secrets (API keys, tokens, passwords) via trufflehog detectors" group:"Extraction"`
+	SecretsFile       string   `help:"Write secrets to file" name:"secrets-file" group:"Extraction"`
+	CapturePaths      bool     `help:"Add URL path components to wordlist" name:"capture-paths" group:"Extraction"`
+	CaptureSubdomains bool     `help:"Add subdomains to wordlist" name:"capture-subdomains" group:"Extraction"`
+	CaptureDomain     bool     `help:"Add domain to wordlist" name:"capture-domain" group:"Extraction"`
+
+	// Words
+	MinWordLength int    `default:"3" help:"Minimum word length" name:"min-word-length" group:"Words"`
+	MaxWordLength int    `default:"0" help:"Maximum word length (0 = no limit)" name:"max-word-length" group:"Words"`
+	Lowercase     bool   `help:"Lowercase all words" group:"Words"`
+	WithNumbers   bool   `default:"true" help:"Include words with numbers" name:"with-numbers" group:"Words"`
+	Count         bool   `short:"c" help:"Show word frequency count" group:"Words"`
+	Groups        int    `short:"g" default:"0" help:"Generate word groups of N" group:"Words"`
+	Mutate        bool   `help:"Generate word mutations (leet, reverse, suffixes like CUPP)" group:"Words"`
+	MutateConfig  string `help:"Custom mutation config file (JSON)" name:"mutate-config" group:"Words"`
+
+	// AI
+	AI         bool   `help:"Enable AI enrichment" group:"AI"`
+	Provider   string `short:"p" help:"AI provider: anthropic, openai, groq, openrouter, cerebras, huggingface" group:"AI"`
+	Model      string `short:"m" help:"Model name or shorthand" group:"AI"`
+	APIKey     string `help:"API key (or use env vars)" name:"api-key" group:"AI"`
+	BaseURL    string `help:"Custom API base URL for OpenAI-compatible endpoints" name:"base-url" group:"AI"`
+	ListModels bool   `help:"List available models for the selected provider" name:"list-models" group:"AI"`
+	Mode       string `default:"default" help:"AI prompt mode: default, passwords, dirs, subdomains, geo" group:"AI"`
+	Prompt     string `help:"Custom AI system prompt (overrides --mode)" group:"AI"`
+	AIWords    int    `default:"200" help:"Number of AI-generated words" name:"ai-words" group:"AI"`
+	AIContext  int    `default:"4000" help:"Max characters of context sent to LLM" name:"ai-context" group:"AI"`
 }
 
 func main() {

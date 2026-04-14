@@ -114,44 +114,18 @@ Arguments:
   [<url>]    Target URL to crawl
 
 Flags:
-  -h, --help                       Show context-sensitive help.
-  -u, --url=STRING                 Target URL to crawl
-  -d, --depth=2                    Crawl depth
-  -o, --output=STRING              Output file (default: stdout)
+  -h, --help    Show context-sensitive help.
+
+Target
+  -u, --url=STRING       Target URL to crawl
+  -d, --depth=2          Crawl depth
+  -o, --output=STRING    Output file (default: stdout)
+  -v, --verbose          Verbose output
+      --version          Print version and exit
+      --update           Self-update to latest release
+
+Crawling
       --user-agent="cewlai/1.0"    User agent for crawler
-  -v, --verbose                    Verbose output
-      --version                    Print version and exit
-      --update                     Self-update to latest release
-      --ai                         Enable AI enrichment
-  -p, --provider=STRING            AI provider: anthropic, openai, groq,
-                                   openrouter, cerebras, huggingface
-  -m, --model=STRING               Model name or shorthand
-      --api-key=STRING             API key (or use env vars)
-      --base-url=STRING            Custom API base URL for OpenAI-compatible
-                                   endpoints
-      --list-models                List available models for the selected
-                                   provider
-      --mode="default"             AI prompt mode: default, passwords, dirs,
-                                   subdomains, geo
-      --prompt=STRING              Custom AI system prompt (overrides --mode)
-      --ai-words=200               Number of AI-generated words
-      --ai-context=4000            Max characters of context sent to LLM
-  -e, --email                      Extract email addresses
-      --email-file=STRING          Write emails to file
-  -a, --meta                       Extract document metadata
-      --meta-file=STRING           Write metadata to file
-  -s, --secrets                    Extract secrets (API keys, tokens,
-                                   passwords) via trufflehog detectors
-      --secrets-file=STRING        Write secrets to file
-      --min-word-length=3          Minimum word length
-      --max-word-length=0          Maximum word length (0 = no limit)
-      --lowercase                  Lowercase all words
-      --with-numbers               Include words with numbers
-  -c, --count                      Show word frequency count
-  -g, --groups=0                   Generate word groups of N
-      --mutate                     Generate word mutations (leet, reverse,
-                                   suffixes like CUPP)
-      --mutate-config=STRING       Custom mutation config file (JSON)
       --offsite                    Follow offsite links
       --proxy=STRING               HTTP proxy URL
       --auth-type=STRING           Auth type: basic
@@ -160,14 +134,48 @@ Flags:
       --header=HEADER,...          Custom header (repeatable, Key: Value)
       --exclude=STRING             File with paths to exclude
       --max-pages=0                Maximum pages to crawl (0 = no limit)
+      --max-files=0                Maximum files to process for FTP/SFTP/SMB
+                                   (0 = no limit)
   -t, --threads=2                  Number of concurrent crawl threads
-      --capture-paths              Add URL path components to wordlist
-      --capture-subdomains         Add subdomains to wordlist
-      --capture-domain             Add domain to wordlist
       --no-cache                   Disable crawl cache
       --cache-ttl=60               Cache TTL in minutes
-      --max-files=0                Maximum files to process for FTP/SFTP/SMB (0
-                                   = no limit)
+
+Extraction
+  -e, --email                  Extract email addresses
+      --email-file=STRING      Write emails to file
+  -a, --meta                   Extract document metadata
+      --meta-file=STRING       Write metadata to file
+  -s, --secrets                Extract secrets (API keys, tokens, passwords)
+                               via trufflehog detectors
+      --secrets-file=STRING    Write secrets to file
+      --capture-paths          Add URL path components to wordlist
+      --capture-subdomains     Add subdomains to wordlist
+      --capture-domain         Add domain to wordlist
+
+Words
+      --min-word-length=3       Minimum word length
+      --max-word-length=0       Maximum word length (0 = no limit)
+      --lowercase               Lowercase all words
+      --with-numbers            Include words with numbers
+  -c, --count                   Show word frequency count
+  -g, --groups=0                Generate word groups of N
+      --mutate                  Generate word mutations (leet, reverse,
+                                suffixes like CUPP)
+      --mutate-config=STRING    Custom mutation config file (JSON)
+
+AI
+      --ai                 Enable AI enrichment
+  -p, --provider=STRING    AI provider: anthropic, openai, groq, openrouter,
+                           cerebras, huggingface
+  -m, --model=STRING       Model name or shorthand
+      --api-key=STRING     API key (or use env vars)
+      --base-url=STRING    Custom API base URL for OpenAI-compatible endpoints
+      --list-models        List available models for the selected provider
+      --mode="default"     AI prompt mode: default, passwords, dirs,
+                           subdomains, geo
+      --prompt=STRING      Custom AI system prompt (overrides --mode)
+      --ai-words=200       Number of AI-generated words
+      --ai-context=4000    Max characters of context sent to LLM
 ```
 
 ## Security and Privacy
