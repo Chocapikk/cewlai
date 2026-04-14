@@ -84,15 +84,8 @@ func (s *crawlState) addContext(text string) {
 	}
 }
 
-func (s *crawlState) contextLimit() int {
-	if s.opts.MaxContext > 0 {
-		return s.opts.MaxContext
-	}
-	return 4000
-}
-
 func (s *crawlState) buildContext() string {
-	return buildContextFromPages(s.pageContexts, s.contextLimit())
+	return buildContextFromPages(s.pageContexts, defaultContextLimit(s.opts))
 }
 
 func (s *crawlState) addEmail(email string) {
@@ -487,10 +480,3 @@ func toSet(items []string) map[string]struct{} {
 	return m
 }
 
-func mapKeys(m map[string]struct{}) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	return out
-}
