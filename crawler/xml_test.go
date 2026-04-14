@@ -74,6 +74,26 @@ func TestExtractFromXML_Atom(t *testing.T) {
 	}
 }
 
+func TestExtractFromXML_SVG(t *testing.T) {
+	svg := []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Company Logo</title>
+  <desc>Acme Corporation security division</desc>
+  <text x="10" y="50">Admin Portal</text>
+  <text x="10" y="70">Confidential</text>
+</svg>`)
+
+	wordSet := make(map[string]struct{})
+	extractFromXML(svg, wordSet)
+
+	expected := []string{"Company", "Logo", "Acme", "Corporation", "security", "division", "Admin", "Portal", "Confidential"}
+	for _, w := range expected {
+		if _, ok := wordSet[w]; !ok {
+			t.Errorf("expected %q in wordSet from SVG, not found", w)
+		}
+	}
+}
+
 func TestExtractFromXML_Empty(t *testing.T) {
 	wordSet := make(map[string]struct{})
 	extractFromXML([]byte(""), wordSet)

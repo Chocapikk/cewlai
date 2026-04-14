@@ -204,7 +204,7 @@ func (s *crawlState) onResponse(r *colly.Response) {
 		s.mu.Unlock()
 	}
 
-	if strings.Contains(contentType, "xml") || strings.HasSuffix(reqURL, ".xml") {
+	if strings.Contains(contentType, "xml") || strings.HasSuffix(reqURL, ".xml") || strings.HasSuffix(reqURL, ".svg") {
 		s.mu.Lock()
 		extractFromXML(r.Body, s.wordSet)
 		s.mu.Unlock()
