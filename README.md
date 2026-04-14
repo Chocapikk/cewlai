@@ -202,7 +202,7 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 ## How AI Enrichment Works
 
 1. The crawler extracts visible text from the target site
-2. A context summary (up to 4000 chars) is sent to the LLM
+2. A context summary (default 4000 chars, configurable with `--ai-context`) is sent to the LLM
 3. The LLM generates contextually related words that are NOT on the site: industry terms, likely passwords, role names, product names, date patterns, location words, common mutations
 4. Both crawled and AI-generated words are merged, deduplicated, and sorted
 
