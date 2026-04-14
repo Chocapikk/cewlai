@@ -35,6 +35,7 @@ type crawlState struct {
 	emailSet          map[string]struct{}
 	metaSet           map[string]struct{}
 	pageContexts      []string
+	secrets           []string
 	title             string
 	pages             int
 	opts              CrawlOptions
@@ -42,6 +43,7 @@ type crawlState struct {
 	excludeSet        map[string]struct{}
 	headerMap         map[string]string
 	resourceCollector *colly.Collector
+	scanner           *parser.SecretScanner
 }
 
 func (s *crawlState) addWords(text string) {
@@ -92,6 +94,9 @@ func crawlHTTP(ctx context.Context, opts CrawlOptions) (*CrawlResult, error) {
 		excludeSet: toSet(opts.ExcludePaths),
 		headerMap:  parseHeaders(opts.Headers),
 	}
+	if opts.ExtractSecrets {
+		s.scanner = parser.NewSecretScanner()
+	}
 
 	c, err := s.buildCollector()
 	if err != nil {
@@ -125,6 +130,7 @@ func crawlHTTP(ctx context.Context, opts CrawlOptions) (*CrawlResult, error) {
 		Words:    mapKeys(s.wordSet),
 		Emails:   mapKeys(s.emailSet),
 		Metadata: mapKeys(s.metaSet),
+		Secrets:  s.secrets,
 		Context:  ctxText,
 		URL:      opts.URL,
 		Title:    s.title,
@@ -234,6 +240,17 @@ func (s *crawlState) onResponse(r *colly.Response) {
 		s.mu.Lock()
 		parser.CaptureURLComponents(r.Request.URL, s.baseURL, s.wordSet, s.opts.CapturePaths, s.opts.CaptureSubdomains, s.opts.CaptureDomain)
 		s.mu.Unlock()
+	}
+
+	if s.scanner != nil && len(r.Body) > 0 {
+		findings := s.scanner.Scan(string(r.Body), reqURL)
+		if len(findings) > 0 {
+			s.mu.Lock()
+			for _, f := range findings {
+				s.secrets = append(s.secrets, fmt.Sprintf("[%s] %s (source: %s)", f.DetectorName, f.Raw, f.Source))
+			}
+			s.mu.Unlock()
+		}
 	}
 }
 

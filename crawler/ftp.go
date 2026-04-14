@@ -54,9 +54,9 @@ func crawlFTP(addr, user, pass, startPath string, opts CrawlOptions) (*CrawlResu
 	_ = conn.Quit()
 
 	downloader := ftpPoolDownloader(addr, user, pass, opts.Threads)
-	pageContexts, processed := processFiles("FTP", files, wordSet, opts, downloader)
+	pageContexts, secrets, processed := processFiles("FTP", files, wordSet, opts, downloader)
 
-	return buildFileResult("ftp", addr, wordSet, pageContexts, processed, opts), nil
+	return buildFileResult("ftp", addr, wordSet, pageContexts, secrets, processed, opts), nil
 }
 
 func ftpConnect(addr, user, pass string) (*ftp.ServerConn, error) {

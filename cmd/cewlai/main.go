@@ -54,10 +54,12 @@ type CLI struct {
 	AIContext int    `default:"4000" help:"Max characters of context sent to LLM" name:"ai-context"`
 
 	// Extraction
-	Email     bool   `short:"e" help:"Extract email addresses"`
-	EmailFile string `help:"Write emails to file" name:"email-file"`
-	Meta      bool   `short:"a" help:"Extract document metadata"`
-	MetaFile  string `help:"Write metadata to file" name:"meta-file"`
+	Email       bool   `short:"e" help:"Extract email addresses"`
+	EmailFile   string `help:"Write emails to file" name:"email-file"`
+	Meta        bool   `short:"a" help:"Extract document metadata"`
+	MetaFile    string `help:"Write metadata to file" name:"meta-file"`
+	Secrets     bool   `short:"s" help:"Extract secrets (API keys, tokens, passwords) via trufflehog detectors"`
+	SecretsFile string `help:"Write secrets to file" name:"secrets-file"`
 
 	// Word processing
 	MinWordLength int    `default:"3" help:"Minimum word length" name:"min-word-length"`
@@ -147,6 +149,7 @@ func main() {
 		NoCache:           cli.NoCache,
 		CacheTTL:          time.Duration(cli.CacheTTL) * time.Minute,
 		MaxFiles:          cli.MaxFiles,
+		ExtractSecrets:    cli.Secrets,
 	}
 
 	logInfo("Starting crawl on %s (depth: %d)", targetURL, cli.Depth)
@@ -306,6 +309,11 @@ func writeExtras(result *crawler.CrawlResult, cli CLI) {
 		sort.Strings(result.Metadata)
 		logSuccess("Extracted %d metadata entries", len(result.Metadata))
 		writeLines(result.Metadata, cli.MetaFile)
+	}
+
+	if len(result.Secrets) > 0 {
+		logSuccess("Found %d secrets", len(result.Secrets))
+		writeLines(result.Secrets, cli.SecretsFile)
 	}
 }
 

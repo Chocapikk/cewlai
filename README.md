@@ -5,14 +5,14 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/Chocapikk/cewlai)](https://goreportcard.com/report/github.com/Chocapikk/cewlai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-AI-powered custom wordlist generator. Crawls websites and uses LLMs to generate contextually related words that don't appear on the page - industry jargon, likely passwords, related terminology.
+Replaces CeWL + CUPP in a single Go binary. Crawls HTTP, FTP, SFTP, and SMB targets, parses 10+ content formats, extracts emails, metadata, and secrets (800+ trufflehog detectors), generates AI-enriched wordlists with 6 providers or local models, and mutates passwords - all from one command.
 
-Built on top of the classic [CeWL](https://github.com/digininja/CeWL) concept, rewritten in Go with AI enrichment.
+Built on top of the classic [CeWL](https://github.com/digininja/CeWL) concept, rewritten from scratch in Go.
 
 ## Install
 
 ```bash
-go install github.com/Chocapikk/cewlai@latest
+go install github.com/Chocapikk/cewlai/cmd/cewlai@latest
 ```
 
 Or build from source:
@@ -20,45 +20,61 @@ Or build from source:
 ```bash
 git clone https://github.com/Chocapikk/cewlai.git
 cd cewlai
-go build -o cewlai .
+go build -o cewlai ./cmd/cewlai
 ```
 
 ## Usage
 
-Basic crawl (classic CeWL mode):
+### Wordlist generation
 
 ```bash
+# Basic crawl (classic CeWL mode)
 cewlai -u https://example.com
+
+# With AI enrichment
+cewlai -u https://example.com --ai -p groq
+
+# With password mutations (CUPP-like)
+cewlai -u https://example.com --ai -p groq --mutate
 ```
 
-With AI enrichment:
+### Secret scanning
 
 ```bash
-cewlai -u https://example.com --ai -p anthropic -m sonnet
+# Scan a website for leaked API keys, tokens, credentials
+cewlai -u https://example.com --secrets
+
+# Scan an internal file share
+cewlai -u smb://user:pass@192.168.1.10/data --secrets --secrets-file findings.txt
+
+# Scan an FTP server
+cewlai -u ftp://anonymous@ftp.example.com --secrets
 ```
 
-FTP crawling:
+### Multi-protocol crawling
 
 ```bash
+# FTP
 cewlai -u ftp://anonymous@ftp.example.com
 cewlai -u ftp://user:pass@ftp.example.com/share/docs
-```
 
-SMB crawling:
-
-```bash
+# SMB
 cewlai -u smb://user:pass@192.168.1.10/data
 cewlai -u smb://DOMAIN\\user:pass@host/share/path
-```
 
-SFTP crawling:
-
-```bash
+# SFTP
 cewlai -u sftp://user:pass@host/path/to/files
 cewlai -u sftp://user:pass@host:2222/home/user/data
 ```
 
-With a free provider:
+### Email and metadata extraction
+
+```bash
+cewlai -u https://example.com --email --email-file emails.txt
+cewlai -u https://example.com --meta --meta-file metadata.txt
+```
+
+### AI enrichment
 
 ```bash
 export GROQ_API_KEY=gsk_...
@@ -79,11 +95,12 @@ cewlai -u https://example.com --ai -p groq
 > [-] AI provider error: no API key for groq. Set GROQ_API_KEY or use --api-key
 > ```
 
-Full example:
+### Full example
 
 ```bash
 cewlai -u https://example.com -d 3 --ai -p anthropic -m haiku \
-  --lowercase --email --meta -o wordlist.txt --email-file emails.txt
+  --lowercase --email --meta --secrets --mutate \
+  -o wordlist.txt --email-file emails.txt --secrets-file secrets.txt
 ```
 
 ## Flags
@@ -123,6 +140,9 @@ Flags:
       --email-file=STRING          Write emails to file
   -a, --meta                       Extract document metadata
       --meta-file=STRING           Write metadata to file
+  -s, --secrets                    Extract secrets (API keys, tokens,
+                                   passwords) via trufflehog detectors
+      --secrets-file=STRING        Write secrets to file
       --min-word-length=3          Minimum word length
       --max-word-length=0          Maximum word length (0 = no limit)
       --lowercase                  Lowercase all words
@@ -272,6 +292,7 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 | Error page extraction      | No               | Yes (words from 404, 500, etc.)             |
 | JS URL discovery           | No               | Yes (jsluice URLs are visited)              |
 | HTML comment extraction    | No               | Yes                                         |
+| Secret scanning            | No               | Yes (800+ trufflehog detectors, regex-only)  |
 
 ## Library Usage
 

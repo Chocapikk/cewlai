@@ -17,10 +17,16 @@ type discoveredFile struct {
 	name string
 }
 
-func processFiles(proto string, files []discoveredFile, wordSet map[string]struct{}, opts CrawlOptions, download func(discoveredFile) ([]byte, error)) ([]string, int) {
+func processFiles(proto string, files []discoveredFile, wordSet map[string]struct{}, opts CrawlOptions, download func(discoveredFile) ([]byte, error)) ([]string, []string, int) {
 	var mu sync.Mutex
 	var pageContexts []string
+	var secrets []string
 	var processed atomic.Int32
+
+	var scanner *parser.SecretScanner
+	if opts.ExtractSecrets {
+		scanner = parser.NewSecretScanner()
+	}
 
 	if opts.MaxFiles > 0 && len(files) > opts.MaxFiles {
 		files = files[:opts.MaxFiles]
@@ -38,12 +44,21 @@ func processFiles(proto string, files []discoveredFile, wordSet map[string]struc
 		parser.ParseByExtension(ext, body, wordSet, &pageContexts)
 		mu.Unlock()
 
+		if scanner != nil {
+			findings := scanner.Scan(string(body), f.path)
+			mu.Lock()
+			for _, s := range findings {
+				secrets = append(secrets, fmt.Sprintf("[%s] %s (source: %s)", s.DetectorName, s.Raw, s.Source))
+			}
+			mu.Unlock()
+		}
+
 		n := processed.Add(1)
 		fmt.Fprintf(os.Stderr, "\r[*] %s: %d/%d files processed", proto, n, total)
 	}
 
 	fmt.Fprintf(os.Stderr, "\r\033[K")
-	return pageContexts, int(processed.Load())
+	return pageContexts, secrets, int(processed.Load())
 }
 
 func addNamesToWordSet(name string, wordSet map[string]struct{}) {
@@ -52,9 +67,10 @@ func addNamesToWordSet(name string, wordSet map[string]struct{}) {
 	}
 }
 
-func buildFileResult(proto, addr string, wordSet map[string]struct{}, pageContexts []string, filesProcessed int, opts CrawlOptions) *CrawlResult {
+func buildFileResult(proto, addr string, wordSet map[string]struct{}, pageContexts []string, secrets []string, filesProcessed int, opts CrawlOptions) *CrawlResult {
 	return &CrawlResult{
 		Words:   mapKeys(wordSet),
+		Secrets: secrets,
 		Context: buildContextFromPages(pageContexts, defaultContextLimit(opts)),
 		URL:     proto + "://" + addr,
 		Pages:   filesProcessed,

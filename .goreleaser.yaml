@@ -7,7 +7,7 @@ before:
 
 builds:
   - id: cewlai
-    main: .
+    main: ./cmd/cewlai
     binary: "cewlai"
     env:
       - CGO_ENABLED=1

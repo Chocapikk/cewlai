@@ -59,9 +59,9 @@ func crawlSFTP(addr, user, pass, startPath string, opts CrawlOptions) (*CrawlRes
 	downloader := func(f discoveredFile) ([]byte, error) {
 		return sftpDownload(client, f.path)
 	}
-	pageContexts, processed := processFiles("SFTP", files, wordSet, opts, downloader)
+	pageContexts, secrets, processed := processFiles("SFTP", files, wordSet, opts, downloader)
 
-	return buildFileResult("sftp", addr, wordSet, pageContexts, processed, opts), nil
+	return buildFileResult("sftp", addr, wordSet, pageContexts, secrets, processed, opts), nil
 }
 
 func sftpConnect(addr, user, pass string) (*sftp.Client, error) {

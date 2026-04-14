@@ -26,6 +26,7 @@ type CrawlOptions struct {
 	NoCache           bool
 	CacheTTL          time.Duration
 	MaxFiles          int
+	ExtractSecrets    bool
 	ProxyURL          string
 	AuthType          string
 	AuthUser          string
@@ -38,6 +39,7 @@ type CrawlResult struct {
 	Words    []string
 	Emails   []string
 	Metadata []string
+	Secrets  []string
 	Context  string
 	URL      string
 	Title    string

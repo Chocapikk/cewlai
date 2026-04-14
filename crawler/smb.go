@@ -73,9 +73,9 @@ func crawlSMB(ctx context.Context, addr, user, pass, share, startDir string, opt
 	downloader := func(f discoveredFile) ([]byte, error) {
 		return smbDownload(mount, f.path)
 	}
-	pageContexts, processed := processFiles("SMB", files, wordSet, opts, downloader)
+	pageContexts, secrets, processed := processFiles("SMB", files, wordSet, opts, downloader)
 
-	return buildFileResult("smb", addr+"/"+share, wordSet, pageContexts, processed, opts), nil
+	return buildFileResult("smb", addr+"/"+share, wordSet, pageContexts, secrets, processed, opts), nil
 }
 
 func smbConnect(ctx context.Context, addr, user, pass string) (*smb2.Session, error) {
