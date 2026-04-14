@@ -6,6 +6,8 @@ CeWL AI supports multiple LLM providers out of the box. This document lists all 
 
 > **Tip:** Use `cewlai --list-models -p <provider>` to see available models for any provider.
 
+> **Privacy warning:** Cloud providers receive the crawled context from your target site. During a real pentest engagement, you don't control what these providers log, store, or use for training. If the target data is sensitive, use a local model via `--base-url` (Ollama, LM Studio, vLLM) to keep everything on your machine.
+
 ## Anthropic
 
 - **Website**: https://console.anthropic.com/

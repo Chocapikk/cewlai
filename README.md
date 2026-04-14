@@ -129,6 +129,8 @@ Flags:
 
 > **Tested with Groq and Cerebras.** Other providers are supported but not yet fully tested. If you run into issues, please open an issue.
 
+> **Privacy warning:** When using cloud AI providers, crawled context from the target site is sent to their API. During a real engagement, consider using a local model (`--base-url`) to keep all data on your machine. You don't control what third-party providers log, store, or train on.
+
 ### Paid
 
 | Provider  | Flag           | Models                                                                                         |
