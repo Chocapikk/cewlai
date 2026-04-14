@@ -165,6 +165,11 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 | TLS skip                   | No               | Yes                                         |
 | Obfuscated email detection | No               | Yes                                         |
 | JavaScript parsing         | No               | Yes (jsluice, inline + external .js)        |
+| XML/RSS/Atom/SVG parsing   | No               | Yes (sitemap, feeds, SVG text)              |
+| JSON parsing               | No               | Yes (APIs, manifests, configs)              |
+| CSS parsing                | No               | Yes (selectors, variables, URLs, comments)  |
+| Audio/Video metadata       | No               | Yes (ID3, MP4, OGG - title, artist, album)  |
+| Subtitle extraction        | No               | Yes (VTT + SRT transcript text)             |
 | Word mutations (CUPP-like) | No               | Yes (leet, reverse, suffixes, custom JSON)  |
 
 ## Library Usage
