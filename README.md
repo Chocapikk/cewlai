@@ -238,7 +238,10 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 | API key validation         | No               | Yes (tells you which env var to set)        |
 | Tor/SOCKS5 proxy           | No               | Yes (`--proxy socks5://...`)                |
 | Concurrent crawling        | No (sequential)  | Yes (`-t` configurable threads)             |
-| Resource following         | `<a>` only       | `<a>`, `<script>`, `<link>`, `<img>`, `<iframe>`, `<track>` |
+| Resource following         | `<a>` only       | `<a>` for navigation + separate collector for `<script>`, `<link>`, `<img>`, `<iframe>`, `<track>` (no depth cost) |
+| Error page extraction      | No               | Yes (words from 404, 500, etc.)             |
+| JS URL discovery           | No               | Yes (jsluice URLs are visited)              |
+| HTML comment extraction    | No               | Yes                                         |
 
 ## Library Usage
 
