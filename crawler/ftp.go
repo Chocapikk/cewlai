@@ -6,11 +6,17 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Chocapikk/cewlai/words"
 	"github.com/jlaffaye/ftp"
 )
+
+type ftpFile struct {
+	path string
+	name string
+}
 
 func crawlFTP(addr, user, pass string, opts CrawlOptions) (*CrawlResult, error) {
 	if user == "" {
@@ -23,19 +29,18 @@ func crawlFTP(addr, user, pass string, opts CrawlOptions) (*CrawlResult, error) 
 		addr += ":21"
 	}
 
+	// First connection: list all files
 	conn, err := ftp.Dial(addr, ftp.DialWithTimeout(10*time.Second))
 	if err != nil {
 		return nil, fmt.Errorf("FTP connect failed: %w", err)
 	}
-	defer func() { _ = conn.Quit() }()
-
 	if err := conn.Login(user, pass); err != nil {
+		_ = conn.Quit()
 		return nil, fmt.Errorf("FTP login failed: %w", err)
 	}
 
+	var files []ftpFile
 	wordSet := make(map[string]struct{})
-	var pageContexts []string
-	filesProcessed := 0
 
 	var walk func(dir string)
 	walk = func(dir string) {
@@ -43,43 +48,78 @@ func crawlFTP(addr, user, pass string, opts CrawlOptions) (*CrawlResult, error) 
 		if err != nil {
 			return
 		}
-
 		for _, entry := range entries {
 			if entry.Name == "." || entry.Name == ".." {
 				continue
 			}
-
 			path := dir + "/" + entry.Name
-
 			for _, w := range words.NormalizeAndSplit(entry.Name) {
 				wordSet[w] = struct{}{}
 			}
-
 			if entry.Type == ftp.EntryTypeFolder {
 				walk(path)
-				continue
+			} else {
+				files = append(files, ftpFile{path: path, name: entry.Name})
 			}
-
-			body, err := downloadFTPFile(conn, path)
-			if err != nil || len(body) == 0 {
-				continue
-			}
-
-			ext := strings.ToLower(filepath.Ext(entry.Name))
-			parseByExtension(ext, body, wordSet, &pageContexts)
-			filesProcessed++
-			fmt.Fprintf(os.Stderr, "\r[*] FTP: %d files processed", filesProcessed)
 		}
 	}
-
 	walk("/")
+	_ = conn.Quit()
+
+	// Process files in parallel with worker pool
+	var mu sync.Mutex
+	var pageContexts []string
+	var filesProcessed int32
+
+	threads := opts.Threads
+	if threads < 1 {
+		threads = 2
+	}
+
+	work := make(chan ftpFile)
+	var wg sync.WaitGroup
+
+	for range threads {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			c, err := ftp.Dial(addr, ftp.DialWithTimeout(10*time.Second))
+			if err != nil {
+				return
+			}
+			defer func() { _ = c.Quit() }()
+			if err := c.Login(user, pass); err != nil {
+				return
+			}
+
+			for f := range work {
+				body, err := downloadFTPFile(c, f.path)
+				if err != nil || len(body) == 0 {
+					continue
+				}
+
+				ext := strings.ToLower(filepath.Ext(f.name))
+				mu.Lock()
+				parseByExtension(ext, body, wordSet, &pageContexts)
+				filesProcessed++
+				mu.Unlock()
+				fmt.Fprintf(os.Stderr, "\r[*] FTP: %d/%d files processed", filesProcessed, len(files))
+			}
+		}()
+	}
+
+	for _, f := range files {
+		work <- f
+	}
+	close(work)
+	wg.Wait()
 	fmt.Fprintf(os.Stderr, "\r\033[K")
 
 	return &CrawlResult{
 		Words:   mapKeys(wordSet),
 		Context: buildContextFromPages(pageContexts, defaultContextLimit(opts)),
 		URL:     "ftp://" + addr,
-		Pages:   filesProcessed,
+		Pages:   int(filesProcessed),
 	}, nil
 }
 
