@@ -97,29 +97,30 @@ func downloadFTPFile(conn *ftp.ServerConn, path string) ([]byte, error) {
 }
 
 func processFileContent(ext string, body []byte, wordSet map[string]struct{}, pageContexts *[]string) {
+	// Text-based files: extract words + add to AI context
 	switch ext {
 	case ".txt", ".md", ".csv", ".log", ".conf", ".cfg", ".ini", ".yml", ".yaml":
 		extractTextContent(body, wordSet, pageContexts)
-	case ".html", ".htm":
-		extractTextContent(body, wordSet, pageContexts)
-	case ".xml", ".svg", ".rss":
-		extractFromXML(body, wordSet)
-	case ".json":
-		extractFromJSON(body, wordSet)
-	case ".css":
-		extractFromCSS(body, wordSet)
-	case ".js", ".mjs":
-		extractFromJS(body, wordSet)
-	case ".pdf":
-		var mu sync.Mutex
+		return
+	}
+
+	// Try the shared parsers table (same as HTTP crawler)
+	for _, p := range parsers {
+		for _, e := range p.exts {
+			if ext == e {
+				p.parse(body, wordSet)
+				return
+			}
+		}
+	}
+
+	// PDF/Office metadata (need mutex)
+	var mu sync.Mutex
+	switch {
+	case ext == ".pdf":
 		extractPDFMetadata(body, &mu, wordSet, false, "")
-	case ".docx", ".xlsx", ".pptx", ".dotx", ".potx", ".ppsx":
-		var mu sync.Mutex
+	case ext == ".docx" || ext == ".xlsx" || ext == ".pptx" || ext == ".dotx" || ext == ".potx" || ext == ".ppsx":
 		extractOfficeMetadata(body, &mu, wordSet, false, "")
-	case ".mp3", ".mp4", ".ogg", ".flac", ".wav", ".m4a", ".webm":
-		extractMediaMetadata(body, wordSet)
-	case ".vtt", ".srt":
-		extractSubtitles(body, wordSet)
 	}
 }
 
