@@ -5,13 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/url"
-	"os"
-	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/Chocapikk/cewlai/crawler/parser"
 	"github.com/Chocapikk/cewlai/words"
 	"github.com/jlaffaye/ftp"
 )
@@ -40,11 +36,6 @@ func (f *ftpSource) Crawl(ctx context.Context, opts CrawlOptions) (*CrawlResult,
 	return crawlFTP(addr, user, pass, startPath, opts)
 }
 
-type ftpFile struct {
-	path string
-	name string
-}
-
 func crawlFTP(addr, user, pass, startPath string, opts CrawlOptions) (*CrawlResult, error) {
 	if user == "" {
 		user = "anonymous"
@@ -60,32 +51,13 @@ func crawlFTP(addr, user, pass, startPath string, opts CrawlOptions) (*CrawlResu
 	if err != nil {
 		return nil, err
 	}
-
 	files, wordSet := ftpListAll(conn, startPath)
 	_ = conn.Quit()
 
-	var mu sync.Mutex
-	var pageContexts []string
-	var filesProcessed int32
-	total := len(files)
+	downloader := ftpParallelDownloader(addr, user, pass, opts.Threads)
+	pageContexts, processed := processFiles("FTP", files, wordSet, opts, downloader)
 
-	ftpProcessFiles(addr, user, pass, files, opts.Threads, func(f ftpFile, body []byte) {
-		ext := strings.ToLower(filepath.Ext(f.name))
-		mu.Lock()
-		parser.ParseByExtension(ext, body, wordSet, &pageContexts)
-		filesProcessed++
-		mu.Unlock()
-		fmt.Fprintf(os.Stderr, "\r[*] FTP: %d/%d files processed", filesProcessed, total)
-	})
-
-	fmt.Fprintf(os.Stderr, "\r\033[K")
-
-	return &CrawlResult{
-		Words:   mapKeys(wordSet),
-		Context: buildContextFromPages(pageContexts, defaultContextLimit(opts)),
-		URL:     "ftp://" + addr,
-		Pages:   int(filesProcessed),
-	}, nil
+	return buildFileResult("ftp", addr, wordSet, pageContexts, processed, opts), nil
 }
 
 func ftpConnect(addr, user, pass string) (*ftp.ServerConn, error) {
@@ -100,9 +72,9 @@ func ftpConnect(addr, user, pass string) (*ftp.ServerConn, error) {
 	return conn, nil
 }
 
-func ftpListAll(conn *ftp.ServerConn, startPath string) ([]ftpFile, map[string]struct{}) {
+func ftpListAll(conn *ftp.ServerConn, startPath string) ([]discoveredFile, map[string]struct{}) {
 	wordSet := make(map[string]struct{})
-	var files []ftpFile
+	var files []discoveredFile
 	dirs := []string{startPath}
 
 	for len(dirs) > 0 {
@@ -124,58 +96,52 @@ func ftpListAll(conn *ftp.ServerConn, startPath string) ([]ftpFile, map[string]s
 			}
 			if entry.Type == ftp.EntryTypeFolder {
 				dirs = append(dirs, path)
-			} else {
-				files = append(files, ftpFile{path: path, name: entry.Name})
+				continue
 			}
+			files = append(files, discoveredFile{path: path, name: entry.Name})
 		}
 	}
 
 	return files, wordSet
 }
 
-func ftpProcessFiles(addr, user, pass string, files []ftpFile, threads int, process func(ftpFile, []byte)) {
+func ftpParallelDownloader(addr, user, pass string, threads int) func(discoveredFile) ([]byte, error) {
 	if threads < 1 {
 		threads = 2
 	}
 
-	work := make(chan ftpFile)
-	var wg sync.WaitGroup
+	pool := make(chan *ftp.ServerConn, threads)
 
-	for range threads {
-		wg.Add(1)
-		go ftpWorker(addr, user, pass, work, &wg, process)
-	}
-
-	for _, f := range files {
-		work <- f
-	}
-	close(work)
-	wg.Wait()
-}
-
-func ftpWorker(addr, user, pass string, work <-chan ftpFile, wg *sync.WaitGroup, process func(ftpFile, []byte)) {
-	defer wg.Done()
-
-	conn, err := ftpConnect(addr, user, pass)
-	if err != nil {
-		return
-	}
-	defer func() { _ = conn.Quit() }()
-
-	for f := range work {
-		body, err := ftpDownload(conn, f.path)
-		if err != nil || len(body) == 0 {
-			continue
+	getConn := func() (*ftp.ServerConn, error) {
+		select {
+		case c := <-pool:
+			return c, nil
+		default:
+			return ftpConnect(addr, user, pass)
 		}
-		process(f, body)
 	}
-}
 
-func ftpDownload(conn *ftp.ServerConn, path string) ([]byte, error) {
-	resp, err := conn.Retr(path)
-	if err != nil {
-		return nil, err
+	putConn := func(c *ftp.ServerConn) {
+		select {
+		case pool <- c:
+		default:
+			_ = c.Quit()
+		}
 	}
-	defer func() { _ = resp.Close() }()
-	return io.ReadAll(resp)
+
+	return func(f discoveredFile) ([]byte, error) {
+		c, err := getConn()
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.Retr(f.path)
+		if err != nil {
+			putConn(c)
+			return nil, err
+		}
+		data, err := io.ReadAll(resp)
+		_ = resp.Close()
+		putConn(c)
+		return data, err
+	}
 }

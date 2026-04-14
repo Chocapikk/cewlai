@@ -56,10 +56,12 @@ func NewSource(targetURL string) (Source, error) {
 	switch strings.ToLower(parsed.Scheme) {
 	case "ftp":
 		return &ftpSource{parsed: parsed}, nil
+	case "smb":
+		return &smbSource{parsed: parsed}, nil
 	case "http", "https", "":
 		return &httpSource{url: targetURL}, nil
 	default:
-		return nil, fmt.Errorf("unsupported scheme: %s (supported: http, https, ftp)", parsed.Scheme)
+		return nil, fmt.Errorf("unsupported scheme: %s (supported: http, https, ftp, smb)", parsed.Scheme)
 	}
 }
 
