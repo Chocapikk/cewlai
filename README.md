@@ -74,6 +74,8 @@ Flags:
       --mode="default"             AI prompt mode: default, passwords, dirs,
                                    subdomains, geo
       --prompt=STRING              Custom AI system prompt (overrides --mode)
+      --ai-words=200               Number of AI-generated words
+      --ai-context=4000            Max characters of context sent to LLM
   -e, --email                      Extract email addresses
       --email-file=STRING          Write emails to file
   -a, --meta                       Extract document metadata
