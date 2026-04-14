@@ -262,8 +262,9 @@ import (
 )
 
 func main() {
-	// Crawl a target
-	result, _ := crawler.Crawl(crawler.CrawlOptions{
+	// Crawl a target (HTTP, HTTPS, or FTP)
+	ctx := context.Background()
+	result, _ := crawler.Crawl(ctx, crawler.CrawlOptions{
 		URL:           "https://example.com",
 		Depth:         2,
 		UserAgent:     "mybot/1.0",
@@ -277,8 +278,9 @@ func main() {
 
 	// AI enrichment
 	provider, _ := ai.NewAIProvider("groq", "", "", "")
-	prompt := ai.ResolvePrompt("passwords", "")
-	aiWords, _ := provider.GenerateWords(context.Background(), result, prompt)
+	prompt := ai.ResolvePrompt("passwords", "", 200)
+	maxTokens := ai.MaxTokensForWords(200)
+	aiWords, _ := provider.GenerateWords(ctx, result, prompt, maxTokens)
 
 	// Merge everything
 	final := words.DeduplicateWords(filtered, aiWords)
@@ -290,11 +292,12 @@ func main() {
 
 ### Available packages
 
-| Package   | Import                                | Description                                                      |
-| --------- | ------------------------------------- | ---------------------------------------------------------------- |
-| `crawler` | `github.com/Chocapikk/cewlai/crawler` | Web crawling, email extraction, metadata extraction, URL capture |
-| `words`   | `github.com/Chocapikk/cewlai/words`   | Word splitting, filtering, dedup, counting, grouping             |
-| `ai`      | `github.com/Chocapikk/cewlai/ai`      | LLM providers, prompt modes, response parsing                    |
+| Package          | Import                                        | Description                                                      |
+| ---------------- | --------------------------------------------- | ---------------------------------------------------------------- |
+| `crawler`        | `github.com/Chocapikk/cewlai/crawler`        | Web/FTP crawling, Source interface, cache, options                |
+| `crawler/parser` | `github.com/Chocapikk/cewlai/crawler/parser`  | Content parsers (HTML, JS, XML, JSON, CSS, PDF, Office, media)   |
+| `words`          | `github.com/Chocapikk/cewlai/words`           | Word splitting, filtering, dedup, counting, grouping, mutations  |
+| `ai`             | `github.com/Chocapikk/cewlai/ai`              | LLM providers, prompt modes, response parsing, model listing     |
 
 ## Origin
 
