@@ -199,6 +199,12 @@ func (s *crawlState) onRequest(r *colly.Request) {
 	}
 }
 
+type contentParser struct {
+	types []string
+	exts  []string
+	parse func(body []byte, wordSet map[string]struct{})
+}
+
 func matchType(contentType, reqURL string, types []string, exts []string) bool {
 	for _, t := range types {
 		if strings.Contains(contentType, t) {
@@ -214,6 +220,14 @@ func matchType(contentType, reqURL string, types []string, exts []string) bool {
 	return false
 }
 
+var parsers = []contentParser{
+	{[]string{"javascript", "ecmascript"}, []string{".js", ".mjs"}, extractFromJS},
+	{[]string{"xml", "svg"}, []string{".xml", ".svg", ".rss", ".atom", ".sitemap"}, extractFromXML},
+	{[]string{"json"}, []string{".json", ".webmanifest"}, extractFromJSON},
+	{[]string{"css"}, []string{".css"}, extractFromCSS},
+	{[]string{"text/vtt", "subrip"}, []string{".vtt", ".srt"}, extractSubtitles},
+}
+
 func (s *crawlState) onResponse(r *colly.Response) {
 	contentType := r.Headers.Get("Content-Type")
 	reqURL := r.Request.URL.String()
@@ -222,35 +236,13 @@ func (s *crawlState) onResponse(r *colly.Response) {
 		s.processHTML(r)
 	}
 
-	if matchType(contentType, reqURL, []string{"javascript", "ecmascript"}, []string{".js", ".mjs"}) {
-		s.mu.Lock()
-		extractFromJS(r.Body, s.wordSet)
-		s.mu.Unlock()
+	s.mu.Lock()
+	for _, p := range parsers {
+		if matchType(contentType, reqURL, p.types, p.exts) {
+			p.parse(r.Body, s.wordSet)
+		}
 	}
-
-	if matchType(contentType, reqURL, []string{"xml", "svg"}, []string{".xml", ".svg", ".rss", ".atom", ".sitemap"}) {
-		s.mu.Lock()
-		extractFromXML(r.Body, s.wordSet)
-		s.mu.Unlock()
-	}
-
-	if matchType(contentType, reqURL, []string{"json"}, []string{".json", ".webmanifest"}) {
-		s.mu.Lock()
-		extractFromJSON(r.Body, s.wordSet)
-		s.mu.Unlock()
-	}
-
-	if matchType(contentType, reqURL, []string{"css"}, []string{".css"}) {
-		s.mu.Lock()
-		extractFromCSS(r.Body, s.wordSet)
-		s.mu.Unlock()
-	}
-
-	if matchType(contentType, reqURL, []string{"text/vtt", "subrip"}, []string{".vtt", ".srt"}) {
-		s.mu.Lock()
-		extractSubtitles(r.Body, s.wordSet)
-		s.mu.Unlock()
-	}
+	s.mu.Unlock()
 
 	if matchType(contentType, reqURL, []string{"audio", "video"}, []string{".mp3", ".mp4", ".ogg", ".flac", ".wav", ".m4a", ".webm"}) {
 		extractMediaMetadata(r.Body, &s.mu, s.wordSet)
