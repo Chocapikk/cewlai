@@ -321,11 +321,27 @@ func (s *crawlState) extractEmails(doc *goquery.Document, r *colly.Response) {
 }
 
 func (s *crawlState) followLinks(doc *goquery.Document, r *colly.Response) {
-	doc.Find("a[href]").Each(func(_ int, sel *goquery.Selection) {
-		if href, exists := sel.Attr("href"); exists {
-			_ = r.Request.Visit(r.Request.AbsoluteURL(href))
-		}
-	})
+	selectors := []struct {
+		query string
+		attr  string
+	}{
+		{"a[href]", "href"},
+		{"script[src]", "src"},
+		{"link[href]", "href"},
+		{"img[src]", "src"},
+		{"iframe[src]", "src"},
+		{"source[src]", "src"},
+		{"video[src]", "src"},
+		{"audio[src]", "src"},
+	}
+
+	for _, s := range selectors {
+		doc.Find(s.query).Each(func(_ int, sel *goquery.Selection) {
+			if val, exists := sel.Attr(s.attr); exists {
+				_ = r.Request.Visit(r.Request.AbsoluteURL(val))
+			}
+		})
+	}
 }
 
 func (s *crawlState) processMeta(body []byte, reqURL string) {
