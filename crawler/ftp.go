@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Chocapikk/cewlai/words"
 	"github.com/jlaffaye/ftp"
 )
 
@@ -54,7 +53,7 @@ func crawlFTP(addr, user, pass, startPath string, opts CrawlOptions) (*CrawlResu
 	files, wordSet := ftpListAll(conn, startPath)
 	_ = conn.Quit()
 
-	downloader := ftpParallelDownloader(addr, user, pass, opts.Threads)
+	downloader := ftpPoolDownloader(addr, user, pass, opts.Threads)
 	pageContexts, processed := processFiles("FTP", files, wordSet, opts, downloader)
 
 	return buildFileResult("ftp", addr, wordSet, pageContexts, processed, opts), nil
@@ -86,62 +85,74 @@ func ftpListAll(conn *ftp.ServerConn, startPath string) ([]discoveredFile, map[s
 			continue
 		}
 
-		for _, entry := range entries {
-			if entry.Name == "." || entry.Name == ".." {
-				continue
-			}
-			path := dir + "/" + entry.Name
-			for _, w := range words.NormalizeAndSplit(entry.Name) {
-				wordSet[w] = struct{}{}
-			}
-			if entry.Type == ftp.EntryTypeFolder {
-				dirs = append(dirs, path)
-				continue
-			}
-			files = append(files, discoveredFile{path: path, name: entry.Name})
-		}
+		newDirs, newFiles := ftpClassifyEntries(entries, dir, wordSet)
+		dirs = append(dirs, newDirs...)
+		files = append(files, newFiles...)
 	}
 
 	return files, wordSet
 }
 
-func ftpParallelDownloader(addr, user, pass string, threads int) func(discoveredFile) ([]byte, error) {
+func ftpClassifyEntries(entries []*ftp.Entry, dir string, wordSet map[string]struct{}) ([]string, []discoveredFile) {
+	var dirs []string
+	var files []discoveredFile
+
+	for _, entry := range entries {
+		if entry.Name == "." || entry.Name == ".." {
+			continue
+		}
+		addNamesToWordSet(entry.Name, wordSet)
+		path := dir + "/" + entry.Name
+		if entry.Type == ftp.EntryTypeFolder {
+			dirs = append(dirs, path)
+			continue
+		}
+		files = append(files, discoveredFile{path: path, name: entry.Name})
+	}
+
+	return dirs, files
+}
+
+func ftpPoolDownloader(addr, user, pass string, threads int) func(discoveredFile) ([]byte, error) {
 	if threads < 1 {
 		threads = 2
 	}
-
 	pool := make(chan *ftp.ServerConn, threads)
 
-	getConn := func() (*ftp.ServerConn, error) {
-		select {
-		case c := <-pool:
-			return c, nil
-		default:
-			return ftpConnect(addr, user, pass)
-		}
-	}
-
-	putConn := func(c *ftp.ServerConn) {
-		select {
-		case pool <- c:
-		default:
-			_ = c.Quit()
-		}
-	}
-
 	return func(f discoveredFile) ([]byte, error) {
-		c, err := getConn()
-		if err != nil {
-			return nil, err
+		conn := ftpGetConn(pool, addr, user, pass)
+		if conn == nil {
+			return nil, fmt.Errorf("FTP pool exhausted")
 		}
-		resp, err := c.Retr(f.path)
+		resp, err := conn.Retr(f.path)
 		if err != nil {
-			putConn(c)
+			ftpPutConn(pool, conn)
 			return nil, err
 		}
 		data, err := io.ReadAll(resp)
 		_ = resp.Close()
-		putConn(c)
+		ftpPutConn(pool, conn)
 		return data, err
+	}
+}
+
+func ftpGetConn(pool chan *ftp.ServerConn, addr, user, pass string) *ftp.ServerConn {
+	select {
+	case c := <-pool:
+		return c
+	default:
+		c, err := ftpConnect(addr, user, pass)
+		if err != nil {
+			return nil
+		}
+		return c
+	}
+}
+
+func ftpPutConn(pool chan *ftp.ServerConn, c *ftp.ServerConn) {
+	select {
+	case pool <- c:
+	default:
+		_ = c.Quit()
 	}
 }

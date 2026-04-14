@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"os"
 	"strings"
 
-	"github.com/Chocapikk/cewlai/words"
 	smb2 "github.com/cloudsoda/go-smb2"
 )
 
@@ -56,16 +56,9 @@ func smbPath(u *url.URL) (string, string) {
 }
 
 func crawlSMB(ctx context.Context, addr, user, pass, share, startDir string, opts CrawlOptions) (*CrawlResult, error) {
-	d := &smb2.Dialer{
-		Initiator: &smb2.NTLMInitiator{
-			User:     user,
-			Password: pass,
-		},
-	}
-
-	session, err := d.Dial(ctx, addr)
+	session, err := smbConnect(ctx, addr, user, pass)
 	if err != nil {
-		return nil, fmt.Errorf("SMB connect failed: %w", err)
+		return nil, err
 	}
 	defer func() { _ = session.Logoff() }()
 
@@ -80,10 +73,23 @@ func crawlSMB(ctx context.Context, addr, user, pass, share, startDir string, opt
 	downloader := func(f discoveredFile) ([]byte, error) {
 		return smbDownload(mount, f.path)
 	}
-
 	pageContexts, processed := processFiles("SMB", files, wordSet, opts, downloader)
 
 	return buildFileResult("smb", addr+"/"+share, wordSet, pageContexts, processed, opts), nil
+}
+
+func smbConnect(ctx context.Context, addr, user, pass string) (*smb2.Session, error) {
+	d := &smb2.Dialer{
+		Initiator: &smb2.NTLMInitiator{
+			User:     user,
+			Password: pass,
+		},
+	}
+	session, err := d.Dial(ctx, addr)
+	if err != nil {
+		return nil, fmt.Errorf("SMB connect failed: %w", err)
+	}
+	return session, nil
 }
 
 func smbListAll(mount *smb2.Share, startDir string) ([]discoveredFile, map[string]struct{}) {
@@ -100,32 +106,40 @@ func smbListAll(mount *smb2.Share, startDir string) ([]discoveredFile, map[strin
 			continue
 		}
 
-		for _, entry := range entries {
-			name := entry.Name()
-			if name == "." || name == ".." {
-				continue
-			}
-
-			var path string
-			if dir == "." {
-				path = name
-			} else {
-				path = dir + `\` + name
-			}
-
-			for _, w := range words.NormalizeAndSplit(name) {
-				wordSet[w] = struct{}{}
-			}
-
-			if entry.IsDir() {
-				dirs = append(dirs, path)
-				continue
-			}
-			files = append(files, discoveredFile{path: path, name: name})
-		}
+		newDirs, newFiles := smbClassifyEntries(entries, dir, wordSet)
+		dirs = append(dirs, newDirs...)
+		files = append(files, newFiles...)
 	}
 
 	return files, wordSet
+}
+
+func smbClassifyEntries(entries []os.FileInfo, dir string, wordSet map[string]struct{}) ([]string, []discoveredFile) {
+	var dirs []string
+	var files []discoveredFile
+
+	for _, entry := range entries {
+		name := entry.Name()
+		if name == "." || name == ".." {
+			continue
+		}
+		addNamesToWordSet(name, wordSet)
+
+		var path string
+		if dir == "." {
+			path = name
+		} else {
+			path = dir + `\` + name
+		}
+
+		if entry.IsDir() {
+			dirs = append(dirs, path)
+			continue
+		}
+		files = append(files, discoveredFile{path: path, name: name})
+	}
+
+	return dirs, files
 }
 
 func smbDownload(mount *smb2.Share, path string) ([]byte, error) {

@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 
 	"github.com/Chocapikk/cewlai/crawler/parser"
+	"github.com/Chocapikk/cewlai/words"
 )
 
 type discoveredFile struct {
@@ -39,6 +40,12 @@ func processFiles(proto string, files []discoveredFile, wordSet map[string]struc
 
 	fmt.Fprintf(os.Stderr, "\r\033[K")
 	return pageContexts, int(processed.Load())
+}
+
+func addNamesToWordSet(name string, wordSet map[string]struct{}) {
+	for _, w := range words.NormalizeAndSplit(name) {
+		wordSet[w] = struct{}{}
+	}
 }
 
 func buildFileResult(proto, addr string, wordSet map[string]struct{}, pageContexts []string, filesProcessed int, opts CrawlOptions) *CrawlResult {
