@@ -108,7 +108,7 @@ cewlai -u https://example.com -d 3 --ai -p anthropic -m haiku \
 ```
 Usage: cewlai [<url>] [flags]
 
-AI-Powered Wordlist Generator
+AI-Powered Wordlist Generator & Target Recon Tool
 
 Arguments:
   [<url>]    Target URL to crawl

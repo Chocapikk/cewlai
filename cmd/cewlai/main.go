@@ -26,6 +26,7 @@ func getBanner() string {
 | |__|  __/\ V  V / | |___   / ___ \ | |
  \____\___| \_/\_/  |_____| /_/   \_\___|
       AI-Powered Wordlist Generator
+          & Target Recon Tool
   Created by @Chocapikk | %s
   Thanks to @stlthr4k3r for the original idea
 `, version)
@@ -91,7 +92,7 @@ type CLI struct {
 
 func main() {
 	var cli CLI
-	kong.Parse(&cli, kong.Name("cewlai"), kong.Description("AI-Powered Wordlist Generator"))
+	kong.Parse(&cli, kong.Name("cewlai"), kong.Description("AI-Powered Wordlist Generator & Target Recon Tool"))
 
 	if cli.Version {
 		fmt.Println("cewlai " + version)
