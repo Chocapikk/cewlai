@@ -56,6 +56,7 @@ type CLI struct {
 	Threads           int      `short:"t" default:"2" help:"Number of concurrent crawl threads" group:"Crawling"`
 	NoCache           bool     `help:"Disable crawl cache" name:"no-cache" group:"Crawling"`
 	CacheTTL          int      `default:"60" help:"Cache TTL in minutes" name:"cache-ttl" group:"Crawling"`
+	Dump              string   `help:"Dump all crawled files to directory" group:"Crawling"`
 
 	// Extraction
 	Email             bool     `short:"e" help:"Extract email addresses" group:"Extraction"`
@@ -165,6 +166,7 @@ func main() {
 		CacheTTL:          time.Duration(cli.CacheTTL) * time.Minute,
 		MaxFiles:          cli.MaxFiles,
 		ExtractSecrets:    cli.Secrets,
+		DumpDir:           cli.Dump,
 	}
 
 	logInfo("Starting crawl on %s (depth: %d)", targetURL, cli.Depth)

@@ -5,7 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/Chocapikk/cewlai)](https://goreportcard.com/report/github.com/Chocapikk/cewlai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Replaces CeWL + CUPP in a single Go binary. Crawls HTTP, FTP, SFTP, and SMB targets, parses 10+ content formats, extracts emails, metadata, and secrets (800+ trufflehog detectors), generates AI-enriched wordlists with 6 providers or local models, and mutates passwords - all from one command.
+Replaces CeWL + CUPP in a single Go binary. Crawls HTTP, FTP, SFTP, SMB, and S3 targets, parses 10+ content formats, extracts emails, metadata, and secrets (800+ trufflehog detectors), generates AI-enriched wordlists with 6 providers or local models, and mutates passwords - all from one command.
 
 Built on top of the classic [CeWL](https://github.com/digininja/CeWL) concept, rewritten from scratch in Go.
 
@@ -65,6 +65,24 @@ cewlai -u smb://DOMAIN\\user:pass@host/share/path
 # SFTP
 cewlai -u sftp://user:pass@host/path/to/files
 cewlai -u sftp://user:pass@host:2222/home/user/data
+
+# S3 (AWS, MinIO, any S3-compatible)
+cewlai -u s3://bucket-name
+cewlai -u s3://bucket-name/prefix?region=eu-west-1
+cewlai -u 's3://bucket?endpoint=http://minio:9000' --auth-user KEY --auth-pass SECRET
+```
+
+### File dump
+
+```bash
+# Dump all files from an S3 bucket to disk
+cewlai -u s3://bucket-name --dump /tmp/loot --secrets
+
+# Mirror a file share
+cewlai -u smb://user:pass@192.168.1.10/data --dump /tmp/share
+
+# Dump a website (all responses saved)
+cewlai -u https://example.com --dump /tmp/site
 ```
 
 ### Email and metadata extraction
@@ -139,6 +157,7 @@ Crawling
   -t, --threads=2                  Number of concurrent crawl threads
       --no-cache                   Disable crawl cache
       --cache-ttl=60               Cache TTL in minutes
+      --dump=STRING                Dump all crawled files to directory
 
 Extraction
   -e, --email                  Extract email addresses
@@ -296,11 +315,13 @@ Custom prompt: `--prompt "Your custom system prompt here"`
 | FTP crawling               | No               | Yes (anonymous + auth, parallel downloads)  |
 | SMB crawling               | No               | Yes (SMB2/3, NTLMv2 auth, URL credentials)  |
 | SFTP crawling              | No               | Yes (SSH password auth, custom port)        |
+| S3 crawling                | No               | Yes (AWS, MinIO, S3-compatible, prefix filter) |
 | Resource following         | `<a>` only       | `<a>` for navigation + separate collector for `<script>`, `<link>`, `<img>`, `<iframe>`, `<track>` (no depth cost) |
 | Error page extraction      | No               | Yes (words from 404, 500, etc.)             |
 | JS URL discovery           | No               | Yes (jsluice URLs are visited)              |
 | HTML comment extraction    | No               | Yes                                         |
 | Secret scanning            | No               | Yes (800+ trufflehog detectors, regex-only)  |
+| File dump                  | No               | Yes (mirror all crawled files to disk)       |
 
 ## Library Usage
 
@@ -319,7 +340,7 @@ import (
 )
 
 func main() {
-	// Crawl a target (HTTP, HTTPS, FTP, SFTP, or SMB)
+	// Crawl a target (HTTP, HTTPS, FTP, SFTP, SMB, or S3)
 	ctx := context.Background()
 	result, _ := crawler.Crawl(ctx, crawler.CrawlOptions{
 		URL:           "https://example.com",
@@ -351,7 +372,7 @@ func main() {
 
 | Package          | Import                                        | Description                                                      |
 | ---------------- | --------------------------------------------- | ---------------------------------------------------------------- |
-| `crawler`        | `github.com/Chocapikk/cewlai/crawler`        | HTTP/FTP/SFTP/SMB crawling, Source interface, cache, options      |
+| `crawler`        | `github.com/Chocapikk/cewlai/crawler`        | HTTP/FTP/SFTP/SMB/S3 crawling, Source interface, cache, options   |
 | `crawler/parser` | `github.com/Chocapikk/cewlai/crawler/parser`  | Content parsers (HTML, JS, XML, JSON, CSS, PDF, Office, media)   |
 | `words`          | `github.com/Chocapikk/cewlai/words`           | Word splitting, filtering, dedup, counting, grouping, mutations  |
 | `ai`             | `github.com/Chocapikk/cewlai/ai`              | LLM providers, prompt modes, response parsing, model listing     |

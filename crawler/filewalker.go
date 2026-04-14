@@ -39,6 +39,10 @@ func processFiles(proto string, files []discoveredFile, wordSet map[string]struc
 			continue
 		}
 
+		if opts.DumpDir != "" {
+			dumpFile(opts.DumpDir, f.path, body)
+		}
+
 		ext := strings.ToLower(filepath.Ext(f.name))
 		mu.Lock()
 		parser.ParseByExtension(ext, body, wordSet, &pageContexts)
@@ -59,6 +63,26 @@ func processFiles(proto string, files []discoveredFile, wordSet map[string]struc
 
 	fmt.Fprintf(os.Stderr, "\r\033[K")
 	return pageContexts, secrets, int(processed.Load())
+}
+
+func dumpFile(dir, filePath string, data []byte) {
+	cleaned := filepath.FromSlash(filePath)
+	dest := filepath.Join(dir, cleaned)
+	abs, err := filepath.Abs(dest)
+	if err != nil {
+		return
+	}
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		return
+	}
+	if !strings.HasPrefix(abs, absDir+string(filepath.Separator)) {
+		return
+	}
+	if err := os.MkdirAll(filepath.Dir(abs), 0o755); err != nil {
+		return
+	}
+	_ = os.WriteFile(abs, data, 0o644)
 }
 
 func addNamesToWordSet(name string, wordSet map[string]struct{}) {

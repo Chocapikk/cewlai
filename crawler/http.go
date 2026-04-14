@@ -220,6 +220,14 @@ func (s *crawlState) onResponse(r *colly.Response) {
 	contentType := r.Headers.Get("Content-Type")
 	reqURL := r.Request.URL.String()
 
+	if s.opts.DumpDir != "" && len(r.Body) > 0 {
+		urlPath := r.Request.URL.Path
+		if urlPath == "" || urlPath == "/" {
+			urlPath = "/index.html"
+		}
+		dumpFile(s.opts.DumpDir, r.Request.URL.Host+urlPath, r.Body)
+	}
+
 	if parser.MatchType(contentType, reqURL, []string{"text/html"}, []string{".html", ".htm"}) {
 		s.processHTML(r)
 	}

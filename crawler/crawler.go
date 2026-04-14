@@ -33,6 +33,7 @@ type CrawlOptions struct {
 	AuthPass          string
 	Headers           []string
 	ExcludePaths      []string
+	DumpDir           string
 }
 
 type CrawlResult struct {
@@ -63,10 +64,12 @@ func NewSource(targetURL string) (Source, error) {
 		return &smbSource{parsed: parsed}, nil
 	case "sftp":
 		return &sftpSource{parsed: parsed}, nil
+	case "s3":
+		return &s3Source{parsed: parsed}, nil
 	case "http", "https", "":
 		return &httpSource{url: targetURL}, nil
 	default:
-		return nil, fmt.Errorf("unsupported scheme: %s (supported: http, https, ftp, sftp, smb)", parsed.Scheme)
+		return nil, fmt.Errorf("unsupported scheme: %s (supported: http, https, ftp, sftp, smb, s3)", parsed.Scheme)
 	}
 }
 
