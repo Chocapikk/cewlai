@@ -11,6 +11,8 @@ import (
 	"strings"
 	"sync"
 
+	"golang.org/x/net/html"
+
 	"github.com/Chocapikk/cewlai/words"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
@@ -139,7 +141,12 @@ func (s *crawlState) buildCollector() (*colly.Collector, error) {
 		colly.UserAgent(s.opts.UserAgent),
 	}
 	if !s.opts.Offsite {
-		collectorOpts = append(collectorOpts, colly.AllowedDomains(s.baseURL.Hostname()))
+		host := s.baseURL.Hostname()
+		if strings.HasPrefix(host, "www.") {
+			collectorOpts = append(collectorOpts, colly.AllowedDomains(host, strings.TrimPrefix(host, "www.")))
+		} else {
+			collectorOpts = append(collectorOpts, colly.AllowedDomains(host, "www."+host))
+		}
 	}
 
 	c := colly.NewCollector(collectorOpts...)
@@ -276,6 +283,7 @@ func (s *crawlState) processHTML(r *colly.Response) {
 	s.mu.Lock()
 	s.extractTitle(doc)
 	s.extractAttrs(doc)
+	s.extractComments(doc)
 	s.extractBodyText(doc)
 	s.mu.Unlock()
 
@@ -295,6 +303,12 @@ func (s *crawlState) extractTitle(doc *goquery.Document) {
 	}
 }
 
+var wordAttrs = []string{
+	"alt", "title", "placeholder", "aria-label", "aria-description",
+	"data-title", "data-name", "data-label", "data-value",
+	"content", "value", "label", "summary",
+}
+
 func (s *crawlState) extractAttrs(doc *goquery.Document) {
 	doc.Find("meta[name=description], meta[name=keywords]").Each(func(_ int, sel *goquery.Selection) {
 		if content, exists := sel.Attr("content"); exists && content != "" {
@@ -303,17 +317,30 @@ func (s *crawlState) extractAttrs(doc *goquery.Document) {
 		}
 	})
 
-	doc.Find("img[alt]").Each(func(_ int, sel *goquery.Selection) {
-		if alt, exists := sel.Attr("alt"); exists && alt != "" {
-			s.addWords(alt)
+	doc.Find("*").Each(func(_ int, sel *goquery.Selection) {
+		for _, attr := range wordAttrs {
+			if val, exists := sel.Attr(attr); exists && val != "" {
+				s.addWords(val)
+			}
 		}
 	})
+}
 
-	doc.Find("input[placeholder]").Each(func(_ int, sel *goquery.Selection) {
-		if ph, exists := sel.Attr("placeholder"); exists && ph != "" {
-			s.addWords(ph)
+func (s *crawlState) extractComments(doc *goquery.Document) {
+	doc.Contents().Each(func(_ int, sel *goquery.Selection) {
+		for _, node := range sel.Nodes {
+			extractCommentsFromNode(node, s)
 		}
 	})
+}
+
+func extractCommentsFromNode(node *html.Node, s *crawlState) {
+	if node.Type == html.CommentNode {
+		s.addWords(strings.TrimSpace(node.Data))
+	}
+	for child := node.FirstChild; child != nil; child = child.NextSibling {
+		extractCommentsFromNode(child, s)
+	}
 }
 
 func (s *crawlState) extractBodyText(doc *goquery.Document) {
