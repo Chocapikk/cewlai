@@ -204,6 +204,12 @@ func (s *crawlState) onResponse(r *colly.Response) {
 		s.mu.Unlock()
 	}
 
+	if strings.Contains(contentType, "xml") || strings.HasSuffix(reqURL, ".xml") {
+		s.mu.Lock()
+		extractFromXML(r.Body, s.wordSet)
+		s.mu.Unlock()
+	}
+
 	if s.opts.ExtractMeta {
 		s.processMeta(r.Body, reqURL)
 	}
