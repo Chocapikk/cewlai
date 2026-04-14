@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/Chocapikk/cewlai/words"
 	"github.com/dhowden/tag"
@@ -17,17 +16,13 @@ var (
 	vttTagRe       = regexp.MustCompile(`<[^>]+>`)
 )
 
-func extractMediaMetadata(body []byte, mu *sync.Mutex, wordSet map[string]struct{}) {
+func extractMediaMetadata(body []byte, wordSet map[string]struct{}) {
 	m, err := tag.ReadFrom(bytes.NewReader(body))
 	if err != nil {
 		return
 	}
 
-	mu.Lock()
-	defer mu.Unlock()
-
-	fields := []string{m.Title(), m.Artist(), m.Album(), m.AlbumArtist(), m.Genre(), m.Composer()}
-	for _, f := range fields {
+	for _, f := range []string{m.Title(), m.Artist(), m.Album(), m.AlbumArtist(), m.Genre(), m.Composer()} {
 		if f == "" {
 			continue
 		}

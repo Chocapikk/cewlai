@@ -226,6 +226,7 @@ var parsers = []contentParser{
 	{[]string{"json"}, []string{".json", ".webmanifest"}, extractFromJSON},
 	{[]string{"css"}, []string{".css"}, extractFromCSS},
 	{[]string{"text/vtt", "subrip"}, []string{".vtt", ".srt"}, extractSubtitles},
+	{[]string{"audio", "video"}, []string{".mp3", ".mp4", ".ogg", ".flac", ".wav", ".m4a", ".webm"}, extractMediaMetadata},
 }
 
 func (s *crawlState) onResponse(r *colly.Response) {
@@ -244,9 +245,6 @@ func (s *crawlState) onResponse(r *colly.Response) {
 	}
 	s.mu.Unlock()
 
-	if matchType(contentType, reqURL, []string{"audio", "video"}, []string{".mp3", ".mp4", ".ogg", ".flac", ".wav", ".m4a", ".webm"}) {
-		extractMediaMetadata(r.Body, &s.mu, s.wordSet)
-	}
 
 	if s.opts.ExtractMeta {
 		s.processMeta(r.Body, reqURL)
