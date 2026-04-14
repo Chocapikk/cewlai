@@ -21,6 +21,10 @@ func processFiles(proto string, files []discoveredFile, wordSet map[string]struc
 	var mu sync.Mutex
 	var pageContexts []string
 	var processed atomic.Int32
+
+	if opts.MaxFiles > 0 && len(files) > opts.MaxFiles {
+		files = files[:opts.MaxFiles]
+	}
 	total := len(files)
 
 	for _, f := range files {

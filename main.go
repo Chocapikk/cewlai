@@ -84,6 +84,7 @@ type CLI struct {
 	CaptureDomain     bool     `help:"Add domain to wordlist" name:"capture-domain"`
 	NoCache           bool     `help:"Disable crawl cache" name:"no-cache"`
 	CacheTTL          int      `default:"60" help:"Cache TTL in minutes" name:"cache-ttl"`
+	MaxFiles          int      `default:"0" help:"Maximum files to process for FTP/SFTP/SMB (0 = no limit)" name:"max-files"`
 }
 
 func main() {
@@ -145,6 +146,7 @@ func main() {
 		ExcludePaths:      excludePaths,
 		NoCache:           cli.NoCache,
 		CacheTTL:          time.Duration(cli.CacheTTL) * time.Minute,
+		MaxFiles:          cli.MaxFiles,
 	}
 
 	logInfo("Starting crawl on %s (depth: %d)", targetURL, cli.Depth)

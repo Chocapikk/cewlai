@@ -25,6 +25,7 @@ type CrawlOptions struct {
 	MaxContext        int
 	NoCache           bool
 	CacheTTL          time.Duration
+	MaxFiles          int
 	ProxyURL          string
 	AuthType          string
 	AuthUser          string
