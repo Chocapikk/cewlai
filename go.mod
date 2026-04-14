@@ -12,7 +12,9 @@ require (
 	github.com/gocolly/colly/v2 v2.3.0
 	github.com/jlaffaye/ftp v0.2.0
 	github.com/openai/openai-go v1.12.0
-	golang.org/x/net v0.47.0
+	github.com/pkg/sftp v1.13.10
+	golang.org/x/crypto v0.50.0
+	golang.org/x/net v0.52.0
 )
 
 require (
@@ -37,6 +39,7 @@ require (
 	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
+	github.com/kr/fs v0.1.0 // indirect
 	github.com/nlnwa/whatwg-url v0.6.2 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/smacker/go-tree-sitter v0.0.0-20230720070738-0d0a9f78d8f8 // indirect
@@ -45,10 +48,10 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
-	golang.org/x/crypto v0.44.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
