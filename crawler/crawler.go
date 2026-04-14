@@ -210,6 +210,12 @@ func (s *crawlState) onResponse(r *colly.Response) {
 		s.mu.Unlock()
 	}
 
+	if strings.Contains(contentType, "json") || strings.HasSuffix(reqURL, ".json") {
+		s.mu.Lock()
+		extractFromJSON(r.Body, s.wordSet)
+		s.mu.Unlock()
+	}
+
 	if s.opts.ExtractMeta {
 		s.processMeta(r.Body, reqURL)
 	}
