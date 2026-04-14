@@ -144,6 +144,10 @@ Flags:
       --capture-paths              Add URL path components to wordlist
       --capture-subdomains         Add subdomains to wordlist
       --capture-domain             Add domain to wordlist
+      --no-cache                   Disable crawl cache
+      --cache-ttl=60               Cache TTL in minutes
+      --max-files=0                Maximum files to process for FTP/SFTP/SMB (0
+                                   = no limit)
 ```
 
 ## Security and Privacy
