@@ -170,6 +170,23 @@ Flags:
 cewlai -u https://example.com --ai -p openai -m llama3 --base-url http://localhost:11434/v1 --api-key dummy
 ```
 
+### Proxy and Tor
+
+The `--proxy` flag supports HTTP, HTTPS, and SOCKS5 proxies natively:
+
+```bash
+# HTTP proxy
+cewlai -u https://example.com --proxy http://127.0.0.1:8080
+
+# Tor (SOCKS5)
+cewlai -u https://example.com --proxy socks5://127.0.0.1:9050
+```
+
+> [!NOTE]
+> Go binaries don't work with proxychains (which hooks libc calls). Use `--proxy` instead.
+
+---
+
 ## AI Modes
 
 | Mode         | Description                                                 |
