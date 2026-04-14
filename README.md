@@ -182,8 +182,8 @@ cewlai -u https://example.com --proxy http://127.0.0.1:8080
 cewlai -u https://example.com --proxy socks5://127.0.0.1:9050
 ```
 
-> [!NOTE]
-> Go binaries don't work with proxychains (which hooks libc calls). Use `--proxy` instead.
+> [!TIP]
+> cewlai is compiled with CGO enabled so proxychains should work too. However `--proxy` is more reliable and doesn't require external tools.
 
 ---
 
