@@ -5,7 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/Chocapikk/cewlai)](https://goreportcard.com/report/github.com/Chocapikk/cewlai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Replaces CeWL + CUPP in a single Go binary. Crawls HTTP, FTP, SFTP, SMB, and S3 targets, parses 10+ content formats, extracts emails, metadata, and secrets (800+ trufflehog detectors), generates AI-enriched wordlists with 6 providers or local models, and mutates passwords - all from one command.
+Replaces CeWL + CUPP in a single Go binary. Crawls HTTP, FTP, SFTP, SMB, and S3 targets, parses 10+ content formats, extracts emails, metadata, and secrets (800+ trufflehog detectors), generates AI-enriched wordlists with 7 providers (incl. opencode) or local models, and mutates passwords - all from one command.
 
 Built on top of the classic [CeWL](https://github.com/digininja/CeWL) concept, rewritten from scratch in Go.
 
@@ -185,7 +185,7 @@ Words
 AI
       --ai                 Enable AI enrichment
   -p, --provider=STRING    AI provider: anthropic, openai, groq, openrouter,
-                           cerebras, huggingface
+                           cerebras, huggingface, opencode
   -m, --model=STRING       Model name or shorthand
       --api-key=STRING     API key (or use env vars)
       --base-url=STRING    Custom API base URL for OpenAI-compatible endpoints
@@ -241,6 +241,40 @@ AI
 ```bash
 cewlai -u https://example.com --ai -p openai -m llama3 --base-url http://localhost:11434/v1 --api-key dummy
 ```
+
+> No external API calls. No data leaves your network.
+
+### Local opencode server
+
+Route AI enrichment through your own **local `opencode serve`** instance instead of a cloud API. opencode is not OpenAI-compatible, so this provider talks to opencode's own HTTP API and reuses whatever providers/models you already configured in opencode (e.g. `big-pickle`, `bankofai/glm-5.3-flash`).
+
+**Setup**
+
+```bash
+# 1. start the opencode server (default http://localhost:4096)
+opencode serve
+
+# 2. (recommended for remote/exposed setups) protect it
+# cewlai picks the same variable up, or pass it with --api-key
+export OPENCODE_SERVER_PASSWORD="<a-strong-password>"
+
+# 3. run cewlai through it
+cewlai -u https://example.com --ai -p opencode -m big-pickle
+
+# pick a specific provider/model you configured inside opencode
+cewlai -u https://example.com --ai -p opencode -m bankofai/glm-5.3-flash
+
+# non-default port
+cewlai -u https://example.com --ai -p opencode --base-url http://localhost:5000
+
+# list the providers/models opencode exposes to you
+cewlai --list-models -p opencode
+```
+
+**Model format:** `-m providerID/modelID`. The slash is optional — a bare value (e.g. `-m big-pickle`) defaults to provider `opencode`. Default model when `-m` is omitted: `big-pickle`.
+
+> [!NOTE]
+> opencode runs a full agent loop per message, so a batch can be noticeably slower than a direct model call (e.g. ~48s for 100 words). The `--ai-words` target and retry loop still apply. Because the crawl context only travels to your local opencode server, this is the privacy-friendly option for sensitive engagements.
 
 ### Proxy and Tor
 

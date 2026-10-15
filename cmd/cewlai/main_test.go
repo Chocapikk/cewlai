@@ -111,3 +111,23 @@ func TestCompletionSubcommand(t *testing.T) {
 		t.Errorf("expected command 'completion <shell>', got %q", kongCtx.Command())
 	}
 }
+
+func TestOpencodeProviderFlag(t *testing.T) {
+	cli := parseCLI(t, []string{"-u", "https://example.com", "--ai", "-p", "opencode", "-m", "bankofai/glm-5.3-flash"})
+	if !cli.AI {
+		t.Error("expected AI true")
+	}
+	if cli.Provider != "opencode" {
+		t.Errorf("expected Provider 'opencode', got %q", cli.Provider)
+	}
+	if cli.Model != "bankofai/glm-5.3-flash" {
+		t.Errorf("expected Model 'bankofai/glm-5.3-flash', got %q", cli.Model)
+	}
+}
+
+func TestOpencodeBaseURLFlag(t *testing.T) {
+	cli := parseCLI(t, []string{"-u", "https://example.com", "--ai", "-p", "opencode", "--base-url", "http://localhost:5000"})
+	if cli.BaseURL != "http://localhost:5000" {
+		t.Errorf("expected BaseURL 'http://localhost:5000', got %q", cli.BaseURL)
+	}
+}

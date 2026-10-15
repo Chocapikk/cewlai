@@ -151,8 +151,12 @@ func NewAIProvider(provider, apiKey, model, baseURL string) (AIProvider, error) 
 			return nil, fmt.Errorf("no API key for openai. Set OPENAI_API_KEY or use --api-key")
 		}
 		return newOpenAIProvider(apiKey, model, baseURL), nil
+	case "opencode":
+		// opencode talks to a local server's own HTTP API, so no API key is
+		// required (auth is handled by OPENCODE_SERVER_PASSWORD on the server).
+		return newOpencodeProvider(apiKey, model, baseURL), nil
 	default:
-		return nil, fmt.Errorf("unknown provider: %s (supported: anthropic, openai, groq, openrouter, cerebras, huggingface)", provider)
+		return nil, fmt.Errorf("unknown provider: %s (supported: anthropic, openai, groq, openrouter, cerebras, huggingface, opencode)", provider)
 	}
 }
 

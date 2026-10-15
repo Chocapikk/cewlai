@@ -2,3 +2,4 @@
 /cewl-ai
 *.exe
 .env
+.cewlai-cache/

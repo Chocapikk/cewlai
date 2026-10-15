@@ -50,6 +50,53 @@ func TestNewAIProvider_UnknownProvider(t *testing.T) {
 	}
 }
 
+func TestNewAIProvider_Opencode(t *testing.T) {
+	p, err := NewAIProvider("opencode", "", "", "")
+	if err != nil {
+		t.Fatalf("NewAIProvider(opencode) error: %v", err)
+	}
+	if p == nil {
+		t.Fatal("NewAIProvider(opencode) returned nil")
+	}
+	if _, ok := p.(*opencodeProvider); !ok {
+		t.Errorf("expected *opencodeProvider, got %T", p)
+	}
+}
+
+func TestParseOpencodeModel(t *testing.T) {
+	tests := []struct {
+		in         string
+		wantProvID string
+		wantModel  string
+	}{
+		{"", "opencode", "big-pickle"},
+		{"big-pickle", "opencode", "big-pickle"},
+		{"bankofai/glm-5.3-flash", "bankofai", "glm-5.3-flash"},
+		{"opencode/gpt-5.6-luna", "opencode", "gpt-5.6-luna"},
+		{"  spaced/after  ", "spaced", "after"},
+	}
+	for _, tt := range tests {
+		provID, model := parseOpencodeModel(tt.in)
+		if provID != tt.wantProvID || model != tt.wantModel {
+			t.Errorf("parseOpencodeModel(%q) = (%q, %q), want (%q, %q)",
+				tt.in, provID, model, tt.wantProvID, tt.wantModel)
+		}
+	}
+}
+
+func TestNewOpencodeProvider_DefaultBaseURL(t *testing.T) {
+	p := newOpencodeProvider("", "", "")
+	if p.providerID != "opencode" {
+		t.Errorf("providerID = %q, want opencode", p.providerID)
+	}
+	if p.modelID != "big-pickle" {
+		t.Errorf("modelID = %q, want big-pickle", p.modelID)
+	}
+	if p.baseURL != DefaultOpenCodeBaseURL {
+		t.Errorf("baseURL = %q, want %q", p.baseURL, DefaultOpenCodeBaseURL)
+	}
+}
+
 func TestNewAIProvider_Presets(t *testing.T) {
 	for _, name := range []string{"groq", "openrouter", "cerebras", "huggingface"} {
 		p, err := NewAIProvider(name, "dummy-key", "", "")

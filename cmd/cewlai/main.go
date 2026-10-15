@@ -81,7 +81,7 @@ type CLI struct {
 
 	// AI
 	AI         bool   `help:"Enable AI enrichment" group:"AI"`
-	Provider   string `short:"p" help:"AI provider: anthropic, openai, groq, openrouter, cerebras, huggingface" group:"AI"`
+	Provider   string `short:"p" help:"AI provider: anthropic, openai, groq, openrouter, cerebras, huggingface, opencode" group:"AI"`
 	Model      string `short:"m" help:"Model name or shorthand" group:"AI"`
 	APIKey     string `help:"API key (or use env vars)" name:"api-key" group:"AI"`
 	BaseURL    string `help:"Custom API base URL for OpenAI-compatible endpoints" name:"base-url" group:"AI"`
