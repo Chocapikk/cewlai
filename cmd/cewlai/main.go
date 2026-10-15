@@ -35,39 +35,39 @@ func getBanner() string {
 
 type CLI struct {
 	// Target
-	Url       string `short:"u" help:"Target URL to crawl" name:"url" group:"Target"`
-	Depth     int    `short:"d" default:"2" help:"Crawl depth" group:"Target"`
-	Output    string `short:"o" help:"Output file (default: stdout)" group:"Target"`
-	Verbose   bool   `short:"v" help:"Verbose output" group:"Target"`
-	Version   bool   `help:"Print version and exit" group:"Target"`
-	Update    bool   `help:"Self-update to latest release" group:"Target"`
+	Url     string `short:"u" help:"Target URL to crawl" name:"url" group:"Target"`
+	Depth   int    `short:"d" default:"2" help:"Crawl depth" group:"Target"`
+	Output  string `short:"o" help:"Output file (default: stdout)" group:"Target"`
+	Verbose bool   `short:"v" help:"Verbose output" group:"Target"`
+	Version bool   `help:"Print version and exit" group:"Target"`
+	Update  bool   `help:"Self-update to latest release" group:"Target"`
 
 	// Crawling
-	UserAgent         string   `default:"cewlai/1.0" help:"User agent for crawler" name:"user-agent" group:"Crawling"`
-	Offsite           bool     `help:"Follow offsite links" group:"Crawling"`
-	Proxy             string   `help:"HTTP proxy URL" group:"Crawling"`
-	AuthType          string   `help:"Auth type: basic" name:"auth-type" group:"Crawling"`
-	AuthUser          string   `help:"Auth username" name:"auth-user" group:"Crawling"`
-	AuthPass          string   `help:"Auth password" name:"auth-pass" group:"Crawling"`
-	Header            []string `help:"Custom header (repeatable, Key: Value)" group:"Crawling"`
-	Exclude           string   `help:"File with paths to exclude" group:"Crawling"`
-	MaxPages          int      `default:"0" help:"Maximum pages to crawl (0 = no limit)" name:"max-pages" group:"Crawling"`
-	MaxFiles          int      `default:"0" help:"Maximum files to process for FTP/SFTP/SMB (0 = no limit)" name:"max-files" group:"Crawling"`
-	Threads           int      `short:"t" default:"2" help:"Number of concurrent crawl threads" group:"Crawling"`
-	NoCache           bool     `help:"Disable crawl cache" name:"no-cache" group:"Crawling"`
-	CacheTTL          int      `default:"60" help:"Cache TTL in minutes" name:"cache-ttl" group:"Crawling"`
-	Dump              string   `help:"Dump all crawled files to directory" group:"Crawling"`
+	UserAgent string   `default:"cewlai/1.0" help:"User agent for crawler" name:"user-agent" group:"Crawling"`
+	Offsite   bool     `help:"Follow offsite links" group:"Crawling"`
+	Proxy     string   `help:"HTTP proxy URL" group:"Crawling"`
+	AuthType  string   `help:"Auth type: basic" name:"auth-type" group:"Crawling"`
+	AuthUser  string   `help:"Auth username" name:"auth-user" group:"Crawling"`
+	AuthPass  string   `help:"Auth password" name:"auth-pass" group:"Crawling"`
+	Header    []string `help:"Custom header (repeatable, Key: Value)" group:"Crawling"`
+	Exclude   string   `help:"File with paths to exclude" group:"Crawling"`
+	MaxPages  int      `default:"0" help:"Maximum pages to crawl (0 = no limit)" name:"max-pages" group:"Crawling"`
+	MaxFiles  int      `default:"0" help:"Maximum files to process for FTP/SFTP/SMB (0 = no limit)" name:"max-files" group:"Crawling"`
+	Threads   int      `short:"t" default:"2" help:"Number of concurrent crawl threads" group:"Crawling"`
+	NoCache   bool     `help:"Disable crawl cache" name:"no-cache" group:"Crawling"`
+	CacheTTL  int      `default:"60" help:"Cache TTL in minutes" name:"cache-ttl" group:"Crawling"`
+	Dump      string   `help:"Dump all crawled files to directory" group:"Crawling"`
 
 	// Extraction
-	Email             bool     `short:"e" help:"Extract email addresses" group:"Extraction"`
-	EmailFile         string   `help:"Write emails to file" name:"email-file" group:"Extraction"`
-	Meta              bool     `short:"a" help:"Extract document metadata" group:"Extraction"`
-	MetaFile          string   `help:"Write metadata to file" name:"meta-file" group:"Extraction"`
-	Secrets           bool     `short:"s" help:"Extract secrets (API keys, tokens, passwords) via trufflehog detectors" group:"Extraction"`
-	SecretsFile       string   `help:"Write secrets to file" name:"secrets-file" group:"Extraction"`
-	CapturePaths      bool     `help:"Add URL path components to wordlist" name:"capture-paths" group:"Extraction"`
-	CaptureSubdomains bool     `help:"Add subdomains to wordlist" name:"capture-subdomains" group:"Extraction"`
-	CaptureDomain     bool     `help:"Add domain to wordlist" name:"capture-domain" group:"Extraction"`
+	Email             bool   `short:"e" help:"Extract email addresses" group:"Extraction"`
+	EmailFile         string `help:"Write emails to file" name:"email-file" group:"Extraction"`
+	Meta              bool   `short:"a" help:"Extract document metadata" group:"Extraction"`
+	MetaFile          string `help:"Write metadata to file" name:"meta-file" group:"Extraction"`
+	Secrets           bool   `short:"s" help:"Extract secrets (API keys, tokens, passwords) via trufflehog detectors" group:"Extraction"`
+	SecretsFile       string `help:"Write secrets to file" name:"secrets-file" group:"Extraction"`
+	CapturePaths      bool   `help:"Add URL path components to wordlist" name:"capture-paths" group:"Extraction"`
+	CaptureSubdomains bool   `help:"Add subdomains to wordlist" name:"capture-subdomains" group:"Extraction"`
+	CaptureDomain     bool   `help:"Add domain to wordlist" name:"capture-domain" group:"Extraction"`
 
 	// Words
 	MinWordLength int    `default:"3" help:"Minimum word length" name:"min-word-length" group:"Words"`
